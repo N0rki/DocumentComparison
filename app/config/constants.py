@@ -1,0 +1,1 @@
+PDF_PATH = r'documents/pdfs'
