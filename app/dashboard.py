@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import json
+import requests
+import feedparser
+from scholarly import scholarly
+import time
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
@@ -16,6 +20,7 @@ import matplotlib.colors as mcolors
 import networkx as nx
 from pyvis.network import Network
 
+# Fetch data from ChromaDB
 class DataLoader:
     @staticmethod
     def load_data_from_chromadb():
@@ -80,6 +85,7 @@ class DataLoader:
             st.write("Full traceback:", traceback.format_exc())
             return pd.DataFrame()
 
+# Dimensionality reduction
 class DimensionalityReducer:
     @staticmethod
     def reduce_embeddings(embeddings, n_components=2, method="PCA"):
@@ -94,6 +100,7 @@ class DimensionalityReducer:
             raise ValueError("Unsupported dimensionality reduction method")
         return reducer.fit_transform(embeddings)
 
+# Clustering
 class Clusterer:
     @staticmethod
     def cluster_documents(embeddings, algorithm, n_clusters=None):
@@ -150,6 +157,7 @@ class Clusterer:
 
         return cluster_to_category
 
+# Visualization
 class Visualizer:
     @staticmethod
     def get_distinct_colors(palette_name, n_colors):
@@ -319,25 +327,91 @@ class Visualizer:
         )
         return fig
 
-class SemanticSearch:
+# External API Integration
+class ExternalAPIs:
     @staticmethod
-    def semantic_search(df, query):
+    def fetch_pubmed_articles(query, max_results=10):
         """
-        Perform semantic search using SPECTER embeddings.
+        Fetch articles from PubMed based on a search query.
         """
-        query_embedding = vectorize_text_specter(query)
-        query_embedding = np.array(query_embedding)
+        base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+        params = {
+            "db": "pubmed",
+            "term": query,
+            "retmax": max_results,
+            "retmode": "json"
+        }
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            article_ids = data.get("esearchresult", {}).get("idlist", [])
+            return article_ids
+        else:
+            st.error(f"Failed to fetch data from PubMed: {response.status_code}")
+            return []
 
-        document_embeddings = np.array(df["embedding"].tolist())
-        query_embedding = query_embedding.reshape(1, -1)
-        document_embeddings = document_embeddings.reshape(len(document_embeddings), -1)
+    @staticmethod
+    def fetch_pubmed_article_details(article_id):
+        """
+        Fetch details for a specific PubMed article by ID.
+        """
+        base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+        params = {
+            "db": "pubmed",
+            "id": article_id,
+            "retmode": "json"
+        }
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Failed to fetch article details: {response.status_code}")
+            return None
 
-        similarity_scores = cosine_similarity(query_embedding, document_embeddings).flatten()
-        df["similarity"] = similarity_scores
-        df = df.sort_values(by="similarity", ascending=False)
+    @staticmethod
+    def fetch_arxiv_articles(query, max_results=10):
+        """
+        Fetch articles from arXiv based on a search query.
+        """
+        base_url = "http://export.arxiv.org/api/query"
+        params = {
+            "search_query": query,
+            "max_results": max_results,
+            "sortBy": "submittedDate",
+            "sortOrder": "descending"
+        }
+        response = requests.get(base_url, params=params)
+        if response.status_code == 200:
+            feed = feedparser.parse(response.content)
+            articles = []
+            for entry in feed.entries:
+                article = {
+                    "title": entry.title,
+                    "authors": [author.name for author in entry.authors],
+                    "summary": entry.summary,
+                    "published": entry.published,
+                    "link": entry.link
+                }
+                articles.append(article)
+            return articles
+        else:
+            st.error(f"Failed to fetch data from arXiv: {response.status_code}")
+            return []
 
-        return df
+    @staticmethod
+    def fetch_citation_count(title):
+        """
+        Fetch citation count for a paper using Google Scholar.
+        """
+        try:
+            search_query = scholarly.search_pubs(title)
+            publication = next(search_query)
+            return publication.get("num_citations", 0)
+        except Exception as e:
+            st.error(f"Failed to fetch citation count: {str(e)}")
+            return 0
 
+# Main function
 def main():
     st.title("Interactive Document Dashboard")
     st.sidebar.header("Filters and Settings")
@@ -572,6 +646,46 @@ def main():
         # Display search results
         st.subheader("Search Results")
         st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
+
+    # External API Integration
+    st.sidebar.subheader("External API Integration")
+
+    # PubMed Search
+    st.sidebar.subheader("Search PubMed")
+    pubmed_query = st.sidebar.text_input("Enter a PubMed search query")
+    if pubmed_query:
+        article_ids = ExternalAPIs.fetch_pubmed_articles(pubmed_query, max_results=5)
+        if article_ids:
+            st.write("### PubMed Results")
+            for article_id in article_ids:
+                details = ExternalAPIs.fetch_pubmed_article_details(article_id)
+                if details:
+                    st.write(f"**Title:** {details.get('title', 'N/A')}")
+                    st.write(f"**Authors:** {', '.join(details.get('authors', []))}")
+                    st.write(f"**Abstract:** {details.get('abstract', 'N/A')}")
+                    st.write("---")
+
+    # arXiv Search
+    st.sidebar.subheader("Search arXiv")
+    arxiv_query = st.sidebar.text_input("Enter an arXiv search query")
+    if arxiv_query:
+        articles = ExternalAPIs.fetch_arxiv_articles(arxiv_query, max_results=5)
+        if articles:
+            st.write("### arXiv Results")
+            for article in articles:
+                st.write(f"**Title:** {article['title']}")
+                st.write(f"**Authors:** {', '.join(article['authors'])}")
+                st.write(f"**Published:** {article['published']}")
+                st.write(f"**Summary:** {article['summary']}")
+                st.write(f"**Link:** [Read Paper]({article['link']})")
+                st.write("---")
+
+    # Citation Counts
+    st.sidebar.subheader("Fetch Citation Count")
+    citation_query = st.sidebar.text_input("Enter a paper title to fetch citation count")
+    if citation_query:
+        citation_count = ExternalAPIs.fetch_citation_count(citation_query)
+        st.write(f"**Citation Count:** {citation_count}")
 
     # Scroll-down section to show clusters and their documents
     st.subheader("Cluster Details")
