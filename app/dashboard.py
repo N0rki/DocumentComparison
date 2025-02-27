@@ -25,8 +25,6 @@ from pyvis.network import Network
 from spellchecker import SpellChecker
 import re
 
-
-# Fetch data from ChromaDB
 class DataLoader:
     @staticmethod
     def load_data_from_chromadb():
@@ -91,8 +89,6 @@ class DataLoader:
             st.write("Full traceback:", traceback.format_exc())
             return pd.DataFrame()
 
-
-# Dimensionality reduction
 class DimensionalityReducer:
     @staticmethod
     def reduce_embeddings(embeddings, n_components=2, method="PCA"):
@@ -109,8 +105,6 @@ class DimensionalityReducer:
             raise ValueError("Unsupported dimensionality reduction method")
         return reducer.fit_transform(embeddings)
 
-
-# Clustering
 class Clusterer:
     @staticmethod
     def cluster_documents(embeddings, algorithm, n_clusters=None):
@@ -167,8 +161,6 @@ class Clusterer:
 
         return cluster_to_category
 
-
-# Visualization
 class Visualizer:
     @staticmethod
     def get_distinct_colors(palette_name, n_colors):
@@ -184,7 +176,7 @@ class Visualizer:
         elif palette_name == "Bright":
             colors = list(mcolors.XKCD_COLORS.values())
         else:
-            colors = list(mcolors.TABLEAU_COLORS.values())  # Default to Rainbow
+            colors = list(mcolors.TABLEAU_COLORS.values())
 
         if n_colors > len(colors):
             colors = colors * (n_colors // len(colors)) + colors[:n_colors % len(colors)]
@@ -338,8 +330,6 @@ class Visualizer:
         )
         return fig
 
-
-# External API Integration
 class ExternalAPIs:
     @staticmethod
     def fetch_pubmed_articles(query, max_results=10):
@@ -425,94 +415,52 @@ class ExternalAPIs:
             st.error(f"Failed to fetch citation count: {str(e)}")
             return 0
 
-
-# Semantic Search
 class SemanticSearch:
     @staticmethod
     def semantic_search(df, query, top_k=5, similarity_threshold=0.5):
         """
         Perform semantic search on the DataFrame using SPECTER embeddings.
-
-        Args:
-            df (pd.DataFrame): DataFrame containing documents and their embeddings.
-            query (str): The search query.
-            top_k (int): Number of top results to return.
-            similarity_threshold (float): Minimum similarity score for a document to be included in the results.
-
-        Returns:
-            pd.DataFrame: DataFrame containing the top_k most similar documents above the threshold.
         """
-        # Filter out documents missing abstract, authors, or title
         filtered_df = df.dropna(subset=["abstract", "authors", "title"])
 
-        # Check if there are any valid documents left
         if filtered_df.empty:
             st.warning("No valid documents found (missing abstract, authors, or title).")
             return pd.DataFrame()
 
-        # Vectorize the query using SPECTER
         query_embedding = vectorize_text_specter(query)
-
-        # Convert query_embedding to a NumPy array and reshape it
         query_embedding = np.array(query_embedding).reshape(1, -1)
 
-        # Get document embeddings from the filtered DataFrame
         document_embeddings = np.array(filtered_df["embedding"].tolist())
 
-        # Compute cosine similarity between the query and all documents
         similarities = cosine_similarity(query_embedding, document_embeddings).flatten()
 
-        # Add similarity scores to the filtered DataFrame
         filtered_df["similarity"] = similarities
 
-        # Filter documents based on the similarity threshold
         thresholded_df = filtered_df[filtered_df["similarity"] >= similarity_threshold]
 
-        # Check if any documents meet the threshold
         if thresholded_df.empty:
             st.warning(f"No documents found with similarity >= {similarity_threshold}.")
             return pd.DataFrame()
 
-        # Sort the DataFrame by similarity in descending order
         df_sorted = thresholded_df.sort_values(by="similarity", ascending=False)
 
-        # Return the top_k results
         return df_sorted.head(top_k)
 
-
-# Query Preprocessing
 def preprocess_query(query):
     """
     Preprocess the query by correcting misspellings and removing non-alphanumeric characters.
-
-    Args:
-        query (str): The search query.
-
-    Returns:
-        str: The preprocessed query.
     """
-    # Correct misspellings
     spell = SpellChecker()
     corrected_query = " ".join([spell.correction(word) for word in query.split()])
 
-    # Remove non-alphanumeric characters
     corrected_query = re.sub(r"[^a-zA-Z0-9\s]", "", corrected_query)
 
     return corrected_query
 
-
-# Field Prediction
 def get_most_likely_field(query):
     """
     Determine the most likely arXiv field for a given query using semantic similarity.
-
-    Args:
-        query (str): The search query.
-
-    Returns:
-        str: The most likely arXiv field.
     """
-    # Define arXiv categories and their descriptions
     field_descriptions = {
         "q-bio.NC": "Neuroscience and neural systems.",
         "cs.CL": "Computational linguistics and natural language processing.",
@@ -521,39 +469,30 @@ def get_most_likely_field(query):
         "q-bio.BM": "Biomolecules and molecular biology."
     }
 
-    # Debug: Print the query
     st.write(f"Debug: Query = {query}")
 
-    # Compute the query embedding
     query_embedding = vectorize_text_specter(query)
     query_embedding = np.array(query_embedding).reshape(1, -1)
 
-    # Debug: Print the query embedding shape
     st.write(f"Debug: Query embedding shape = {query_embedding.shape}")
 
-    # Compute embeddings for each field description
     field_embeddings = {}
     for field, description in field_descriptions.items():
         field_embedding = vectorize_text_specter(description)
         field_embeddings[field] = np.array(field_embedding).reshape(1, -1)
 
-        # Debug: Print the field description and embedding shape
         st.write(f"Debug: Field = {field}, Description = {description}")
         st.write(f"Debug: Field embedding shape = {field_embeddings[field].shape}")
 
-    # Calculate cosine similarity between the query and each field
     similarities = {}
     for field, embedding in field_embeddings.items():
         similarity = cosine_similarity(query_embedding, embedding)[0][0]
         similarities[field] = similarity
 
-        # Debug: Print the similarity score for each field
         st.write(f"Debug: Similarity for {field} = {similarity}")
 
-    # Find the field with the highest similarity
     most_likely_field = max(similarities, key=similarities.get)
 
-    # Debug: Print the most likely field
     st.write(f"Debug: Most likely field = {most_likely_field}")
 
     return most_likely_field
@@ -574,25 +513,22 @@ def calculate_silhouette_scores(embeddings, max_clusters=10):
     Calculate silhouette scores for different numbers of clusters using K-Means.
     """
     silhouette_scores = []
-    for n_clusters in range(2, max_clusters + 1):  # Silhouette score requires at least 2 clusters
+    for n_clusters in range(2, max_clusters + 1):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         cluster_labels = kmeans.fit_predict(embeddings)
         silhouette_avg = silhouette_score(embeddings, cluster_labels)
         silhouette_scores.append(silhouette_avg)
     return silhouette_scores
 
-# Main function
 def main():
     st.title("Interactive Document Dashboard")
     st.sidebar.header("Filters and Settings")
 
-    # Load data from ChromaDB
     df = DataLoader.load_data_from_chromadb()
     if df.empty:
         st.warning("No data found in ChromaDB. Please add documents first.")
         return
 
-    # Year range filters
     st.sidebar.subheader("Filter by Year")
     min_year = int(df["year"].min())
     max_year = int(df["year"].max())
@@ -609,32 +545,24 @@ def main():
             help="Filter documents by publication year."
         )
 
-    # Filter data by year
     filtered_df = df[(df["year"] >= year_range[0]) & (df["year"] <= year_range[1])]
 
-    # Define embeddings after filtering the data
     embeddings = np.array(filtered_df["embedding"].tolist())
 
-    # Clustering algorithm selection
     clustering_algorithm = st.sidebar.selectbox(
         "Select Clustering Algorithm",
         ["K-Means", "DBSCAN", "Hierarchical", "GMM"],
         help="Choose a clustering algorithm to group similar documents."
     )
 
-    # Define n_clusters with actual slider value (if applicable)
     if clustering_algorithm in ["K-Means", "Hierarchical", "GMM"]:
-        # Set a default max_clusters value for all algorithms that require it
-        max_clusters = 10  # Default value for max_clusters
+        max_clusters = 10
 
-        # Calculate inertia and silhouette scores for all algorithms that require n_clusters
         inertia_values = calculate_inertia(embeddings, max_clusters)
         silhouette_scores = calculate_silhouette_scores(embeddings, max_clusters)
 
-        # Display both Elbow Method and Silhouette Score plots
         st.sidebar.subheader("Cluster Optimization Methods")
 
-        # Drop-down for informational tips
         with st.sidebar.expander("What are the Elbow Method and Silhouette Score?"):
             st.markdown("""
                 **Elbow Method**:  
@@ -647,7 +575,6 @@ def main():
                 The optimal number of clusters is where the Silhouette Score is highest.
             """)
 
-        # Plot the Elbow Method graph
         fig_elbow = go.Figure()
         fig_elbow.add_trace(go.Scatter(
             x=list(range(1, max_clusters + 1)),
@@ -663,7 +590,6 @@ def main():
         )
         st.sidebar.plotly_chart(fig_elbow, use_container_width=True)
 
-        # Plot the Silhouette Scores graph
         fig_silhouette = go.Figure()
         fig_silhouette.add_trace(go.Scatter(
             x=list(range(2, max_clusters + 1)),
@@ -679,7 +605,6 @@ def main():
         )
         st.sidebar.plotly_chart(fig_silhouette, use_container_width=True)
 
-        # Let the user choose the number of clusters based on the selected method
         n_clusters = st.sidebar.slider(
             "Number of Clusters",
             min_value=2,
@@ -688,9 +613,8 @@ def main():
             help="Select the number of clusters to group documents into."
         )
     else:
-        n_clusters = None  # DBSCAN doesn't require n_clusters
+        n_clusters = None
 
-    # Visualization settings in sidebar
     st.sidebar.subheader("Visualization Settings")
     use_custom_colors = st.sidebar.checkbox(
         "Use Custom Node Colors",
@@ -710,7 +634,6 @@ def main():
         )
         custom_colors = Visualizer.get_distinct_colors(color_palette, n_clusters if n_clusters else 10)
 
-    # Background color selection
     bg_colors = Visualizer.get_background_colors()
     bg_color_name = st.sidebar.selectbox(
         "Background Color",
@@ -719,12 +642,10 @@ def main():
     )
     bg_color = bg_colors[bg_color_name]
 
-    # Text color based on background
     is_dark_bg = bg_color in ["black", "#2d2d2d", "#001f3f", "#1a472a"]
     text_color = "white" if is_dark_bg else "black"
     grid_color = "gray" if is_dark_bg else "LightGray"
 
-    # Dimensionality reduction selection
     st.sidebar.subheader("Dimensionality Reduction")
     reduction_method = st.sidebar.selectbox(
         "Select Method",
@@ -737,22 +658,16 @@ def main():
         help="Choose whether to visualize the data in 2D or 3D."
     )
 
-    # Perform dimensionality reduction
-    reduced_embeddings = DimensionalityReducer.reduce_embeddings(embeddings, n_components=n_components,
-                                                                 method=reduction_method)
+    reduced_embeddings = DimensionalityReducer.reduce_embeddings(embeddings, n_components=n_components, method=reduction_method)
 
-    # Cluster documents using the selected algorithm
     cluster_labels = Clusterer.cluster_documents(embeddings, clustering_algorithm, n_clusters)
 
-    # Debug: Print the number of unique clusters
     st.write(f"Number of unique clusters: {len(np.unique(cluster_labels))}")
     st.write("Unique Cluster Labels:", np.unique(cluster_labels))
 
-    # Assign predefined categories to clusters based on cosine similarity
     cluster_to_category = Clusterer.assign_categories_to_clusters(cluster_labels, embeddings, PREDEFINED_CATEGORIES)
     st.write("Cluster to Category Mapping:", cluster_to_category)
 
-    # Assign cluster names based on cluster labels
     filtered_df["cluster"] = [cluster_to_category[label] for label in cluster_labels]
 
     if n_components == 2:
@@ -763,7 +678,6 @@ def main():
         filtered_df["y"] = reduced_embeddings[:, 1]
         filtered_df["z"] = reduced_embeddings[:, 2]
 
-    # Enhanced visualization settings
     st.subheader("Document Clusters")
     with st.expander("What are Document Clusters?"):
         st.markdown("""
@@ -788,10 +702,9 @@ def main():
         help="Adjust the opacity of nodes in the scatter plot."
     )
 
-    # Plot settings
     plot_settings = {
         "color": "cluster",
-        "color_discrete_sequence": custom_colors,  # Use either custom or palette colors
+        "color_discrete_sequence": custom_colors,
         "hover_data": ["title", "authors", "year"],
         "opacity": marker_opacity,
     }
@@ -817,7 +730,6 @@ def main():
         )
         fig.update_traces(marker=dict(size=marker_size))
 
-    # Update plot layout with selected colors
     fig.update_layout(
         plot_bgcolor=bg_color,
         paper_bgcolor=bg_color,
@@ -831,7 +743,6 @@ def main():
         )
     )
 
-    # Update axes
     axis_settings = dict(
         showgrid=True,
         gridwidth=1,
@@ -850,7 +761,6 @@ def main():
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # Interactive Network Graph
     st.subheader("Interactive Network Graph")
     with st.expander("What is a Network Graph?"):
         st.markdown("""
@@ -868,18 +778,14 @@ def main():
         help="Adjust the similarity threshold to control how documents are connected in the graph."
     )
 
-    # Create the network graph with custom colors
     net = Visualizer.create_network_graph(filtered_df, similarity_threshold, custom_colors)
 
-    # Display the network graph in Streamlit
     with open("network.html", "r", encoding="utf-8") as f:
         html_content = f.read()
     st.components.v1.html(html_content, height=600, scrolling=True)
 
-    # Advanced Visualizations
     st.subheader("Advanced Visualizations")
 
-    # Heatmap
     st.subheader("Document Similarity Heatmap")
     with st.expander("What is a Heatmap?"):
         st.markdown("""
@@ -899,7 +805,6 @@ def main():
     heatmap_fig = Visualizer.create_heatmap(filtered_df, similarity_threshold)
     st.plotly_chart(heatmap_fig, use_container_width=True)
 
-    # Parallel Coordinates
     st.subheader("Parallel Coordinates Plot")
     with st.expander("What is a Parallel Coordinates Plot?"):
         st.markdown("""
@@ -917,7 +822,6 @@ def main():
     if parallel_coords_fig:
         st.plotly_chart(parallel_coords_fig, use_container_width=True)
 
-    # Sankey Diagram
     st.subheader("Sankey Diagram")
     with st.expander("What is a Sankey Diagram?"):
         st.markdown("""
@@ -929,32 +833,27 @@ def main():
     sankey_fig = Visualizer.create_sankey_diagram(filtered_df)
     st.plotly_chart(sankey_fig, use_container_width=True)
 
-    # Search Documents
     st.sidebar.subheader("Search Documents")
     search_query = st.sidebar.text_input(
         "Search by Title, Author, or Abstract",
-        key="search_documents_input",  # Unique key
+        key="search_documents_input",
         help="Enter a query to search for documents by title, author, or abstract."
     )
 
-    # Add a slider for similarity threshold
     similarity_threshold = st.sidebar.slider(
         "Similarity Threshold",
         min_value=0.0,
         max_value=1.0,
-        value=0.5,  # Default threshold
+        value=0.5,
         step=0.1,
         help="Set the minimum similarity score for documents to be included in the results."
     )
 
     if search_query:
-        # Preprocess the query
         corrected_query = preprocess_query(search_query)
 
-        # Get the most likely field for the query
         most_likely_field = get_most_likely_field(corrected_query)
 
-        # Perform semantic search using SPECTER with the similarity threshold
         search_results = SemanticSearch.semantic_search(
             filtered_df,
             corrected_query,
@@ -962,14 +861,12 @@ def main():
             similarity_threshold=similarity_threshold
         )
 
-        # Display search results
         if not search_results.empty:
             st.subheader("Search Results")
             st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
         else:
             st.warning("No documents found for the search query above the similarity threshold.")
 
-        # Fetch and display relevant articles from PubMed
         st.subheader("Related Articles from PubMed")
         pubmed_article_ids = ExternalAPIs.fetch_pubmed_articles(corrected_query, max_results=5)
         if pubmed_article_ids:
@@ -983,7 +880,6 @@ def main():
         else:
             st.write("No related articles found in PubMed.")
 
-        # Fetch and display relevant articles from arXiv
         st.subheader(f"Related Articles from arXiv ({most_likely_field})")
         arxiv_articles = ExternalAPIs.fetch_arxiv_articles(corrected_query, max_results=5, category=most_likely_field)
         if arxiv_articles:
@@ -997,24 +893,21 @@ def main():
         else:
             st.write("No related articles found in arXiv.")
 
-    # Citation Counts
     st.sidebar.subheader("Fetch Citation Count")
     citation_query = st.sidebar.text_input(
         "Enter a paper title to fetch citation count",
-        key="citation_count_input",  # Unique key
+        key="citation_count_input",
         help="Enter the title of a paper to fetch its citation count from Google Scholar."
     )
     if citation_query:
         citation_count = ExternalAPIs.fetch_citation_count(citation_query)
         st.write(f"**Citation Count:** {citation_count}")
 
-    # Scroll-down section to show clusters and their documents
     st.subheader("Cluster Details")
     with st.expander("View Documents in Each Cluster"):
         for cluster_name, group in filtered_df.groupby("cluster"):
             st.write(f"### Cluster: {cluster_name}")
             st.write(group[["title", "authors", "year", "abstract"]])
-
 
 if __name__ == "__main__":
     main()
