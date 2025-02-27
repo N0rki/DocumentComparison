@@ -15,7 +15,6 @@ def connect_to_chromadb(host="localhost", port=8000):
             - collection: The ChromaDB collection.
     """
     try:
-        # Initialize ChromaDB API client
         print("Connecting to ChromaDB API...")
         chroma_client = chromadb.HttpClient(
             host=host,
@@ -27,7 +26,6 @@ def connect_to_chromadb(host="localhost", port=8000):
         )
         print("Successfully connected to ChromaDB API")
 
-        # Create or load a collection
         print("Creating/loading collection 'research_documents'...")
         collection = chroma_client.get_or_create_collection(name="research_documents")
         print(f"Collection ready. Current count: {collection.count()}")

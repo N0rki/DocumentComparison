@@ -38,18 +38,14 @@ def query_similar_documents(query_text, top_k=5):
         dict: Query results containing documents, metadata, and distances.
     """
     try:
-        # Connect to ChromaDB
         chroma_client, collection = connect_to_chromadb()
 
-        # Expand the query
         expanded_query = expand_query(query_text)
         print(f"Expanded query: {expanded_query}")
 
-        # Generate embedding for the expanded query
         print("Generating query embedding...")
         query_embedding = vectorize_text_specter(expanded_query)
 
-        # Search for similar documents using precomputed embeddings in ChromaDB
         print(f"Searching for top {top_k} similar documents...")
         results = collection.query(
             query_embeddings=[query_embedding],
@@ -68,11 +64,9 @@ def query_similar_documents(query_text, top_k=5):
 def main():
     print("\n=== Starting query execution ===")
     try:
-        # Example query
         query_text = "computational biology"
         print(f"\nPerforming query: '{query_text}'")
 
-        # Query similar documents
         results = query_similar_documents(query_text)
 
         print("\n=== Query Results ===")
@@ -92,7 +86,6 @@ def main():
         print(f"\nERROR in query execution: {str(e)}")
         print("=== Query execution failed ===")
         raise
-
 
 if __name__ == "__main__":
     main()

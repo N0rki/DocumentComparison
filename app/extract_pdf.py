@@ -8,12 +8,10 @@ folder_path = PDF_PATH
 
 
 def extract_text_from_pdf(pdf_path):
-    # Using PDFMiner high_level extract_text function
     text = extract_text(pdf_path)
     return text
 
 
-# Processing files in a batch
 def process_files_batch(files_batch):
     texts = []
     filenames = []
@@ -26,7 +24,6 @@ def process_files_batch(files_batch):
     return texts, filenames
 
 
-# Loading texts from multiple PDF files in batches
 def load_texts_from_pdfs_batched(batch_size):
     all_texts = []
     all_filenames = []

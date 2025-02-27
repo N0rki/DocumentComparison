@@ -8,13 +8,10 @@ from config.constants import PDF_PATH
 
 print("Starting application...")
 
-# Cache for storing extracted details
 extracted_details_cache = {}
 
-# Connect to ChromaDB
 chroma_client, collection = connect_to_chromadb()
 
-# Load SPECTER model and tokenizer
 print("Loading SPECTER model and tokenizer...")
 tokenizer = AutoTokenizer.from_pretrained('allenai/specter')
 model = AutoModel.from_pretrained('allenai/specter')
@@ -24,7 +21,6 @@ print("SPECTER model loaded successfully")
 def vectorize_text_specter(text):
     print(f"Vectorizing text (length: {len(text)} characters)...")
     try:
-        # Tokenize the input text
         inputs = tokenizer(
             text,
             padding=True,
@@ -34,14 +30,11 @@ def vectorize_text_specter(text):
         )
         print(f"Text tokenized. Input shape: {inputs['input_ids'].shape}")
 
-        # Generate embeddings
         with torch.no_grad():
             outputs = model(**inputs)
 
-        # Use the [CLS] token embedding as the document embedding
         embeddings = outputs.last_hidden_state[:, 0, :].squeeze().numpy()
 
-        # Convert to list for JSON serialization
         if isinstance(embeddings, np.ndarray):
             embeddings = embeddings.tolist()
 
@@ -56,17 +49,15 @@ def vectorize_text_specter(text):
 def add_documents_to_collection(directory_path):
     print(f"\nProcessing directory: {directory_path}")
     try:
-        # Extract details from all PDFs in the directory
         if directory_path in extracted_details_cache:
             print("Using cached details for directory.")
             details = extracted_details_cache[directory_path]
         else:
             print("Extracting details from PDFs...")
             details = extract_details(directory_path)
-            extracted_details_cache[directory_path] = details  # Cache the details
+            extracted_details_cache[directory_path] = details
             print(f"Extracted details from {len(details)} PDFs")
 
-        # Process documents in batches
         batch_size = 100
         documents = []
         embeddings = []
@@ -81,13 +72,17 @@ def add_documents_to_collection(directory_path):
             print("Generating embedding...")
             embedding = vectorize_text_specter(combined_text)
 
+            pdf_path = os.path.join(directory_path, filename)
+
             documents.append(combined_text)
             embeddings.append(embedding)
             metadatas.append({
                 "filename": filename,
+                "filepath": pdf_path,
                 "title": info['title'],
                 "authors": info['authors'],
-                "abstract": info['abstract']
+                "abstract": info['abstract'],
+                "year": info.get('year', 2023)
             })
             ids.append(filename)
 
@@ -125,7 +120,6 @@ def add_documents_to_collection(directory_path):
 def main():
     print("\n=== Starting main execution ===")
     try:
-        # Example usage
         directory_path = PDF_PATH
         print(f"Processing directory: {directory_path}")
 
