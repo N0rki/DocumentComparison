@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -24,13 +25,14 @@ from nltk.corpus import wordnet
 from pyvis.network import Network
 from spellchecker import SpellChecker
 import re
+from PyPDF2 import PdfReader
+from summarizer import summarize_text
+from summarizer import chunk_and_summarize
 
 class DataLoader:
     @staticmethod
-    def load_data_from_chromadb():
-        """
-        Fetch embeddings and metadata from ChromaDB with debug statements.
-        """
+    @st.cache_data()
+    def load_data():
         try:
             st.write("Attempting to connect to ChromaDB...")
             chroma_client, collection = connect_to_chromadb()
@@ -91,10 +93,8 @@ class DataLoader:
 
 class DimensionalityReducer:
     @staticmethod
-    def reduce_embeddings(embeddings, n_components=2, method="PCA"):
-        """
-        Reduce high-dimensional embeddings to 2D or 3D using PCA, t-SNE, or UMAP.
-        """
+    @st.cache_data
+    def reduce_embeddings(embeddings, method, n_components):
         if method == "PCA":
             reducer = PCA(n_components=n_components)
         elif method == "t-SNE":
@@ -107,10 +107,8 @@ class DimensionalityReducer:
 
 class Clusterer:
     @staticmethod
-    def cluster_documents(embeddings, algorithm, n_clusters=None):
-        """
-        Cluster documents using the selected algorithm.
-        """
+    @st.cache_data
+    def cluster_documents(embeddings, algorithm, n_clusters):
         if algorithm == "K-Means":
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
             cluster_labels = kmeans.fit_predict(embeddings)
@@ -128,10 +126,8 @@ class Clusterer:
         return cluster_labels
 
     @staticmethod
+    @st.cache_data
     def assign_categories_to_clusters(cluster_labels, embeddings, predefined_categories):
-        """
-        Assign predefined categories to clusters based on cosine similarity.
-        """
         category_embeddings = {category: vectorize_text_specter(category) for category in predefined_categories}
         cluster_to_category = {}
         unique_clusters = np.unique(cluster_labels)
@@ -164,9 +160,6 @@ class Clusterer:
 class Visualizer:
     @staticmethod
     def get_distinct_colors(palette_name, n_colors):
-        """
-        Dynamically generate distinct colors for a given number of clusters.
-        """
         if palette_name == "Rainbow":
             colors = list(mcolors.TABLEAU_COLORS.values())
         elif palette_name == "Nature":
@@ -185,9 +178,6 @@ class Visualizer:
 
     @staticmethod
     def get_background_colors():
-        """
-        Return background color options.
-        """
         return {
             "White": "white",
             "Light Gray": "#f5f5f5",
@@ -199,9 +189,6 @@ class Visualizer:
 
     @staticmethod
     def create_network_graph(df, similarity_threshold=0.7, custom_colors=None):
-        """
-        Create an interactive network graph using pyvis with custom options.
-        """
         G = nx.Graph()
 
         for idx, row in df.iterrows():
@@ -248,9 +235,6 @@ class Visualizer:
 
     @staticmethod
     def create_heatmap(df, similarity_threshold=0.7):
-        """
-        Create a heatmap of document similarities.
-        """
         embeddings = np.array(df["embedding"].tolist())
         similarity_matrix = cosine_similarity(embeddings)
         similarity_matrix[similarity_matrix < similarity_threshold] = 0
@@ -282,9 +266,6 @@ class Visualizer:
 
     @staticmethod
     def create_parallel_coordinates(df, color_scheme="Viridis"):
-        """
-        Create a parallel coordinates plot for reduced embeddings.
-        """
         if "x" not in df.columns or "y" not in df.columns:
             st.warning("Please perform dimensionality reduction first.")
             return None
@@ -304,9 +285,6 @@ class Visualizer:
 
     @staticmethod
     def create_sankey_diagram(df):
-        """
-        Create a Sankey diagram to visualize document flow between clusters.
-        """
         cluster_counts = df["cluster"].value_counts().reset_index()
         cluster_counts.columns = ["cluster", "count"]
 
@@ -333,9 +311,6 @@ class Visualizer:
 class ExternalAPIs:
     @staticmethod
     def fetch_pubmed_articles(query, max_results=10):
-        """
-        Fetch articles from PubMed based on a search query.
-        """
         base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
         params = {
             "db": "pubmed",
@@ -354,9 +329,6 @@ class ExternalAPIs:
 
     @staticmethod
     def fetch_pubmed_article_details(article_id):
-        """
-        Fetch details for a specific PubMed article by ID.
-        """
         base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
         params = {
             "db": "pubmed",
@@ -371,42 +343,47 @@ class ExternalAPIs:
             return None
 
     @staticmethod
-    def fetch_arxiv_articles(query, max_results=10, category=None):
-        """
-        Fetch articles from arXiv based on a search query.
-        """
+    def fetch_arxiv_articles(query, max_results=10):
         base_url = "http://export.arxiv.org/api/query"
+
+        terms = query.split()
+
+        title_query = " OR ".join([f'ti:"{term}"' for term in terms])
+        abstract_query = " OR ".join([f'abs:"{term}"' for term in terms])
+        combined_query = f"({title_query}) OR ({abstract_query})"
+
         params = {
-            "search_query": f"{query}",
+            "search_query": combined_query,
             "max_results": max_results,
             "sortBy": "relevance",
             "sortOrder": "descending"
         }
-        if category:
-            params["search_query"] += f" AND cat:{category}"
+
         response = requests.get(base_url, params=params)
         if response.status_code == 200:
             feed = feedparser.parse(response.content)
             articles = []
             for entry in feed.entries:
-                article = {
-                    "title": entry.title,
-                    "authors": [author.name for author in entry.authors],
-                    "summary": entry.summary,
-                    "published": entry.published,
-                    "link": entry.link
-                }
-                articles.append(article)
-            return articles
+                title_matches = any(term.lower() in entry.title.lower() for term in terms)
+                abstract_matches = any(term.lower() in entry.summary.lower() for term in terms)
+
+                if title_matches or abstract_matches:
+                    article = {
+                        "title": entry.title,
+                        "authors": [author.name for author in entry.authors],
+                        "summary": entry.summary,
+                        "published": entry.published,
+                        "link": entry.link
+                    }
+                    articles.append(article)
+
+            return articles[:max_results]
         else:
             st.error(f"Failed to fetch data from arXiv: {response.status_code}")
             return []
 
     @staticmethod
     def fetch_citation_count(title):
-        """
-        Fetch citation count for a paper using Google Scholar.
-        """
         try:
             search_query = scholarly.search_pubs(title)
             publication = next(search_query)
@@ -418,9 +395,6 @@ class ExternalAPIs:
 class SemanticSearch:
     @staticmethod
     def semantic_search(df, query, top_k=5, similarity_threshold=0.5):
-        """
-        Perform semantic search on the DataFrame using SPECTER embeddings.
-        """
         filtered_df = df.dropna(subset=["abstract", "authors", "title"])
 
         if filtered_df.empty:
@@ -447,9 +421,6 @@ class SemanticSearch:
         return df_sorted.head(top_k)
 
 def preprocess_query(query):
-    """
-    Preprocess the query by correcting misspellings and removing non-alphanumeric characters.
-    """
     spell = SpellChecker()
     corrected_query = " ".join([spell.correction(word) for word in query.split()])
 
@@ -458,9 +429,6 @@ def preprocess_query(query):
     return corrected_query
 
 def get_most_likely_field(query):
-    """
-    Determine the most likely arXiv field for a given query using semantic similarity.
-    """
     field_descriptions = {
         "q-bio.NC": "Neuroscience and neural systems.",
         "cs.CL": "Computational linguistics and natural language processing.",
@@ -498,9 +466,6 @@ def get_most_likely_field(query):
     return most_likely_field
 
 def calculate_inertia(embeddings, max_clusters=10):
-    """
-    Calculate inertia for different numbers of clusters using K-Means.
-    """
     inertia_values = []
     for n_clusters in range(1, max_clusters + 1):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -509,9 +474,6 @@ def calculate_inertia(embeddings, max_clusters=10):
     return inertia_values
 
 def calculate_silhouette_scores(embeddings, max_clusters=10):
-    """
-    Calculate silhouette scores for different numbers of clusters using K-Means.
-    """
     silhouette_scores = []
     for n_clusters in range(2, max_clusters + 1):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -520,18 +482,72 @@ def calculate_silhouette_scores(embeddings, max_clusters=10):
         silhouette_scores.append(silhouette_avg)
     return silhouette_scores
 
+def extract_text_from_pdf(pdf_path):
+    reader = PdfReader(pdf_path)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text
+
+
+def add_pdf_summarization():
+    st.sidebar.subheader("PDF Summarization")
+
+    pdf_dir = "app/documents/pdfs"
+    if not os.path.exists(pdf_dir):
+        st.sidebar.warning(f"Directory '{pdf_dir}' does not exist.")
+        return
+
+    pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith(".pdf")]
+    if not pdf_files:
+        st.sidebar.warning(f"No PDF files found in '{pdf_dir}'.")
+        return
+
+    selected_pdf = st.sidebar.selectbox("Select a PDF file", pdf_files)
+
+    max_length = st.sidebar.slider("Maximum Summary Length", 50, 200, 130)
+    min_length = st.sidebar.slider("Minimum Summary Length", 10, 100, 30)
+
+    if st.sidebar.button("Summarize"):
+        with st.spinner("Summarizing PDF... This may take a moment."):
+            try:
+                pdf_path = os.path.join(pdf_dir, selected_pdf)
+                st.sidebar.info(f"Extracting text from '{selected_pdf}'...")
+
+                text = extract_text_from_pdf(pdf_path)
+
+                if not text or len(text.strip()) == 0:
+                    st.error("Could not extract any text from the PDF. The file might be scanned or protected.")
+                    return
+
+                st.sidebar.info("Summarizing text...")
+                summary = chunk_and_summarize(text, max_length=max_length, min_length=min_length)
+
+                if summary.startswith("Error"):
+                    st.error(summary)
+                else:
+                    st.subheader(f"Summary of '{selected_pdf}'")
+                    st.write(summary)
+
+            except Exception as e:
+                st.error(f"Error during summarization: {str(e)}")
+                import traceback
+                st.error(traceback.format_exc())
+
 def main():
     st.title("Interactive Document Dashboard")
     st.sidebar.header("Filters and Settings")
 
-    df = DataLoader.load_data_from_chromadb()
-    if df.empty:
+    if "df" not in st.session_state:
+        st.session_state.df = DataLoader.load_data()
+
+    if st.session_state.df.empty:
         st.warning("No data found in ChromaDB. Please add documents first.")
         return
 
     st.sidebar.subheader("Filter by Year")
-    min_year = int(df["year"].min())
-    max_year = int(df["year"].max())
+    min_year = int(st.session_state.df["year"].min())
+    max_year = int(st.session_state.df["year"].max())
 
     if min_year == max_year:
         st.sidebar.info(f"All documents are from year {min_year}")
@@ -545,9 +561,10 @@ def main():
             help="Filter documents by publication year."
         )
 
-    filtered_df = df[(df["year"] >= year_range[0]) & (df["year"] <= year_range[1])]
+    filtered_df = st.session_state.df[(st.session_state.df["year"] >= year_range[0]) & (st.session_state.df["year"] <= year_range[1])]
 
-    embeddings = np.array(filtered_df["embedding"].tolist())
+    if "embeddings" not in st.session_state:
+        st.session_state.embeddings = np.array(filtered_df["embedding"].tolist())
 
     clustering_algorithm = st.sidebar.selectbox(
         "Select Clustering Algorithm",
@@ -558,8 +575,8 @@ def main():
     if clustering_algorithm in ["K-Means", "Hierarchical", "GMM"]:
         max_clusters = 10
 
-        inertia_values = calculate_inertia(embeddings, max_clusters)
-        silhouette_scores = calculate_silhouette_scores(embeddings, max_clusters)
+        inertia_values = calculate_inertia(st.session_state.embeddings, max_clusters)
+        silhouette_scores = calculate_silhouette_scores(st.session_state.embeddings, max_clusters)
 
         st.sidebar.subheader("Cluster Optimization Methods")
 
@@ -615,6 +632,52 @@ def main():
     else:
         n_clusters = None
 
+    if "cluster_labels" not in st.session_state or clustering_algorithm != st.session_state.get("last_clustering_algorithm") or n_clusters != st.session_state.get("last_n_clusters"):
+        st.session_state.cluster_labels = Clusterer.cluster_documents(
+            st.session_state.embeddings,
+            algorithm=clustering_algorithm,
+            n_clusters=n_clusters
+        )
+        st.session_state.last_clustering_algorithm = clustering_algorithm
+        st.session_state.last_n_clusters = n_clusters
+
+    if "cluster_to_category" not in st.session_state:
+        st.session_state.cluster_to_category = Clusterer.assign_categories_to_clusters(
+            st.session_state.cluster_labels,
+            st.session_state.embeddings,
+            PREDEFINED_CATEGORIES
+        )
+
+    filtered_df["cluster"] = [st.session_state.cluster_to_category[label] for label in st.session_state.cluster_labels]
+
+    reduction_method = st.sidebar.selectbox(
+        "Select Method",
+        ["PCA", "t-SNE", "UMAP"],
+        help="Choose a method to reduce high-dimensional embeddings to 2D or 3D for visualization."
+    )
+    n_components = st.sidebar.radio(
+        "Select Dimensions",
+        [2, 3],
+        help="Choose whether to visualize the data in 2D or 3D."
+    )
+
+    if "reduced_embeddings" not in st.session_state or reduction_method != st.session_state.get("last_reduction_method") or n_components != st.session_state.get("last_n_components"):
+        st.session_state.reduced_embeddings = DimensionalityReducer.reduce_embeddings(
+            st.session_state.embeddings,
+            method=reduction_method,
+            n_components=n_components
+        )
+        st.session_state.last_reduction_method = reduction_method
+        st.session_state.last_n_components = n_components
+
+    if n_components == 2:
+        filtered_df["x"] = st.session_state.reduced_embeddings[:, 0]
+        filtered_df["y"] = st.session_state.reduced_embeddings[:, 1]
+    elif n_components == 3:
+        filtered_df["x"] = st.session_state.reduced_embeddings[:, 0]
+        filtered_df["y"] = st.session_state.reduced_embeddings[:, 1]
+        filtered_df["z"] = st.session_state.reduced_embeddings[:, 2]
+
     st.sidebar.subheader("Visualization Settings")
     use_custom_colors = st.sidebar.checkbox(
         "Use Custom Node Colors",
@@ -645,38 +708,6 @@ def main():
     is_dark_bg = bg_color in ["black", "#2d2d2d", "#001f3f", "#1a472a"]
     text_color = "white" if is_dark_bg else "black"
     grid_color = "gray" if is_dark_bg else "LightGray"
-
-    st.sidebar.subheader("Dimensionality Reduction")
-    reduction_method = st.sidebar.selectbox(
-        "Select Method",
-        ["PCA", "t-SNE", "UMAP"],
-        help="Choose a method to reduce high-dimensional embeddings to 2D or 3D for visualization."
-    )
-    n_components = st.sidebar.radio(
-        "Select Dimensions",
-        [2, 3],
-        help="Choose whether to visualize the data in 2D or 3D."
-    )
-
-    reduced_embeddings = DimensionalityReducer.reduce_embeddings(embeddings, n_components=n_components, method=reduction_method)
-
-    cluster_labels = Clusterer.cluster_documents(embeddings, clustering_algorithm, n_clusters)
-
-    st.write(f"Number of unique clusters: {len(np.unique(cluster_labels))}")
-    st.write("Unique Cluster Labels:", np.unique(cluster_labels))
-
-    cluster_to_category = Clusterer.assign_categories_to_clusters(cluster_labels, embeddings, PREDEFINED_CATEGORIES)
-    st.write("Cluster to Category Mapping:", cluster_to_category)
-
-    filtered_df["cluster"] = [cluster_to_category[label] for label in cluster_labels]
-
-    if n_components == 2:
-        filtered_df["x"] = reduced_embeddings[:, 0]
-        filtered_df["y"] = reduced_embeddings[:, 1]
-    elif n_components == 3:
-        filtered_df["x"] = reduced_embeddings[:, 0]
-        filtered_df["y"] = reduced_embeddings[:, 1]
-        filtered_df["z"] = reduced_embeddings[:, 2]
 
     st.subheader("Document Clusters")
     with st.expander("What are Document Clusters?"):
@@ -852,36 +883,21 @@ def main():
     if search_query:
         corrected_query = preprocess_query(search_query)
 
-        most_likely_field = get_most_likely_field(corrected_query)
-
+        st.subheader("Search Results from Database")
         search_results = SemanticSearch.semantic_search(
-            filtered_df,
+            st.session_state.df,
             corrected_query,
             top_k=5,
-            similarity_threshold=similarity_threshold
+            similarity_threshold=0.5
         )
 
         if not search_results.empty:
-            st.subheader("Search Results")
             st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
         else:
-            st.warning("No documents found for the search query above the similarity threshold.")
+            st.warning("No documents found in the database for the search query above the similarity threshold.")
 
-        st.subheader("Related Articles from PubMed")
-        pubmed_article_ids = ExternalAPIs.fetch_pubmed_articles(corrected_query, max_results=5)
-        if pubmed_article_ids:
-            for article_id in pubmed_article_ids:
-                details = ExternalAPIs.fetch_pubmed_article_details(article_id)
-                if details:
-                    st.write(f"**Title:** {details.get('title', 'N/A')}")
-                    st.write(f"**Authors:** {', '.join(details.get('authors', []))}")
-                    st.write(f"**Abstract:** {details.get('abstract', 'N/A')}")
-                    st.write("---")
-        else:
-            st.write("No related articles found in PubMed.")
-
-        st.subheader(f"Related Articles from arXiv ({most_likely_field})")
-        arxiv_articles = ExternalAPIs.fetch_arxiv_articles(corrected_query, max_results=5, category=most_likely_field)
+        st.subheader("Related Articles from arXiv")
+        arxiv_articles = ExternalAPIs.fetch_arxiv_articles(corrected_query, max_results=5)
         if arxiv_articles:
             for article in arxiv_articles:
                 st.write(f"**Title:** {article['title']}")
@@ -908,6 +924,8 @@ def main():
         for cluster_name, group in filtered_df.groupby("cluster"):
             st.write(f"### Cluster: {cluster_name}")
             st.write(group[["title", "authors", "year", "abstract"]])
+
+    add_pdf_summarization()
 
 if __name__ == "__main__":
     main()

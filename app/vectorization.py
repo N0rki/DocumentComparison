@@ -18,6 +18,7 @@ model = AutoModel.from_pretrained('allenai/specter')
 print("SPECTER model loaded successfully")
 
 
+
 def vectorize_text_specter(text):
     print(f"Vectorizing text (length: {len(text)} characters)...")
     try:
@@ -74,17 +75,34 @@ def add_documents_to_collection(directory_path):
 
             pdf_path = os.path.join(directory_path, filename)
 
-            documents.append(combined_text)
-            embeddings.append(embedding)
-            metadatas.append({
-                "filename": filename,
-                "filepath": pdf_path,
-                "title": info['title'],
-                "authors": info['authors'],
-                "abstract": info['abstract'],
-                "year": info.get('year', 2023)
-            })
-            ids.append(filename)
+            existing_document = collection.get(ids=[filename])
+            if existing_document and len(existing_document["ids"]) > 0:
+                print(f"Document {filename} already exists. Updating...")
+                collection.update(
+                    ids=[filename],
+                    embeddings=[embedding],
+                    metadatas=[{
+                        "filename": filename,
+                        "filepath": pdf_path,
+                        "title": info['title'],
+                        "authors": info['authors'],
+                        "abstract": info['abstract'],
+                        "year": info.get('year', 2023)
+                    }]
+                )
+            else:
+                print(f"Document {filename} does not exist. Adding...")
+                documents.append(combined_text)
+                embeddings.append(embedding)
+                metadatas.append({
+                    "filename": filename,
+                    "filepath": pdf_path,
+                    "title": info['title'],
+                    "authors": info['authors'],
+                    "abstract": info['abstract'],
+                    "year": info.get('year', 2023)
+                })
+                ids.append(filename)
 
             print(f"Current batch size: {len(documents)}/{batch_size}")
 
