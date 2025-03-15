@@ -28,6 +28,7 @@ import re
 from PyPDF2 import PdfReader
 from summarizer import summarize_text
 from summarizer import chunk_and_summarize
+from datetime import datetime
 
 class DataLoader:
     @staticmethod
@@ -343,7 +344,7 @@ class ExternalAPIs:
             return None
 
     @staticmethod
-    def fetch_arxiv_articles(query, max_results=10):
+    def fetch_arxiv_articles(query, max_results=50, year_range=None):
         base_url = "http://export.arxiv.org/api/query"
 
         terms = query.split()
@@ -364,6 +365,12 @@ class ExternalAPIs:
             feed = feedparser.parse(response.content)
             articles = []
             for entry in feed.entries:
+                published_date = entry.published
+                published_year = int(published_date[:4])
+
+                if year_range and (published_year < year_range[0] or published_year > year_range[1]):
+                    continue
+
                 title_matches = any(term.lower() in entry.title.lower() for term in terms)
                 abstract_matches = any(term.lower() in entry.summary.lower() for term in terms)
 
@@ -372,12 +379,13 @@ class ExternalAPIs:
                         "title": entry.title,
                         "authors": [author.name for author in entry.authors],
                         "summary": entry.summary,
-                        "published": entry.published,
-                        "link": entry.link
+                        "published": published_date,
+                        "link": entry.link,
+                        "year": published_year
                     }
                     articles.append(article)
 
-            return articles[:max_results]
+            return articles
         else:
             st.error(f"Failed to fetch data from arXiv: {response.status_code}")
             return []
@@ -539,7 +547,7 @@ def main():
     st.sidebar.header("Filters and Settings")
 
     if "df" not in st.session_state:
-        st.session_state.df = DataLoader.load_data()
+        st.session_state.df = load_data()
 
     if st.session_state.df.empty:
         st.warning("No data found in ChromaDB. Please add documents first.")
@@ -547,21 +555,20 @@ def main():
 
     st.sidebar.subheader("Filter by Year")
     min_year = int(st.session_state.df["year"].min())
-    max_year = int(st.session_state.df["year"].max())
+    current_year = datetime.now().year
 
-    if min_year == max_year:
-        st.sidebar.info(f"All documents are from year {min_year}")
-        year_range = (min_year, min_year)
-    else:
-        year_range = st.sidebar.slider(
-            "Select Year Range",
-            min_value=min_year,
-            max_value=max_year,
-            value=(min_year, max_year),
-            help="Filter documents by publication year."
-        )
+    year_range = st.sidebar.slider(
+        "Select Year Range",
+        min_value=min_year,
+        max_value=current_year,
+        value=(min_year, current_year),
+        help="Filter documents by publication year."
+    )
 
-    filtered_df = st.session_state.df[(st.session_state.df["year"] >= year_range[0]) & (st.session_state.df["year"] <= year_range[1])]
+    filtered_df = st.session_state.df[
+        (st.session_state.df["year"] >= year_range[0]) &
+        (st.session_state.df["year"] <= year_range[1])
+    ]
 
     if "embeddings" not in st.session_state:
         st.session_state.embeddings = np.array(filtered_df["embedding"].tolist())
@@ -865,10 +872,23 @@ def main():
     st.plotly_chart(sankey_fig, use_container_width=True)
 
     st.sidebar.subheader("Search Documents")
+
     search_query = st.sidebar.text_input(
         "Search by Title, Author, or Abstract",
         key="search_documents_input",
         help="Enter a query to search for documents by title, author, or abstract."
+    )
+
+    st.sidebar.subheader("Search by Year")
+    min_year = 1991
+    current_year = datetime.now().year
+
+    year_range = st.sidebar.slider(
+        "Select Year Range",
+        min_value=min_year,
+        max_value=current_year,
+        value=(min_year, current_year),
+        help="Filter documents by publication year."
     )
 
     similarity_threshold = st.sidebar.slider(
@@ -880,34 +900,49 @@ def main():
         help="Set the minimum similarity score for documents to be included in the results."
     )
 
-    if search_query:
-        corrected_query = preprocess_query(search_query)
+    if search_query or year_range != (min_year, current_year):
+        corrected_query = preprocess_query(search_query) if search_query else ""
 
-        st.subheader("Search Results from Database")
-        search_results = SemanticSearch.semantic_search(
-            st.session_state.df,
-            corrected_query,
-            top_k=5,
-            similarity_threshold=0.5
-        )
+        filtered_by_year = st.session_state.df[
+            (st.session_state.df["year"] >= year_range[0]) &
+            (st.session_state.df["year"] <= year_range[1])
+            ]
 
-        if not search_results.empty:
-            st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
+        if search_query:
+            st.subheader("Search Results from Database")
+            search_results = SemanticSearch.semantic_search(
+                filtered_by_year,
+                corrected_query,
+                top_k=5,
+                similarity_threshold=similarity_threshold
+            )
+
+            if not search_results.empty:
+                st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
+            else:
+                st.warning("No documents found in the database for the search query above the similarity threshold.")
         else:
-            st.warning("No documents found in the database for the search query above the similarity threshold.")
+            st.subheader(f"Documents from {year_range[0]} to {year_range[1]}")
+            st.write(filtered_by_year[["title", "authors", "year", "abstract"]])
 
-        st.subheader("Related Articles from arXiv")
-        arxiv_articles = ExternalAPIs.fetch_arxiv_articles(corrected_query, max_results=5)
-        if arxiv_articles:
-            for article in arxiv_articles:
-                st.write(f"**Title:** {article['title']}")
-                st.write(f"**Authors:** {', '.join(article['authors'])}")
-                st.write(f"**Published:** {article['published']}")
-                st.write(f"**Summary:** {article['summary']}")
-                st.write(f"**Link:** [Read Paper]({article['link']})")
-                st.write("---")
-        else:
-            st.write("No related articles found in arXiv.")
+        if search_query:
+            st.subheader("Related Articles from arXiv")
+            arxiv_articles = ExternalAPIs.fetch_arxiv_articles(
+                corrected_query,
+                max_results=50,
+                year_range=year_range
+            )
+            if arxiv_articles:
+                top_5_articles = arxiv_articles[:5]
+                for article in top_5_articles:
+                    st.write(f"**Title:** {article['title']}")
+                    st.write(f"**Authors:** {', '.join(article['authors'])}")
+                    st.write(f"**Published:** {article['published']}")
+                    st.write(f"**Summary:** {article['summary']}")
+                    st.write(f"**Link:** [Read Paper]({article['link']})")
+                    st.write("---")
+            else:
+                st.write("No related articles found in arXiv.")
 
     st.sidebar.subheader("Fetch Citation Count")
     citation_query = st.sidebar.text_input(
