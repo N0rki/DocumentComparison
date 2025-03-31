@@ -1,0 +1,575 @@
+2025-03-31 01:21:40,340 - INFO - Starting application...
+2025-03-31 01:21:40,360 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:21:43,120 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:21:43,120 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:21:45,574 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:21:45,576 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:21:45,584 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:21:45,589 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:21:45,615 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/get "HTTP/1.1 200 OK"
+2025-03-31 01:21:45,625 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:21:46,807 - INFO - SPECTER model loaded successfully
+2025-03-31 01:22:59,031 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:22:59,031 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:23:46,480 - INFO - Starting application...
+2025-03-31 01:23:47,381 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:23:50,171 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:23:50,171 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:23:52,673 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:23:52,677 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:23:52,683 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:23:52,688 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:23:55,431 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:23:56,641 - INFO - SPECTER model loaded successfully
+2025-03-31 01:23:56,696 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:23:56,696 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:23:59,264 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:23:59,265 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:24:01,760 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:24:01,762 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:24:01,768 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:24:01,773 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:24:01,821 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:30:42,165 - INFO - Starting application...
+2025-03-31 01:30:42,186 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:30:44,977 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:30:44,977 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:30:47,505 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:30:47,509 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:30:47,516 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:30:47,521 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:30:47,545 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/get "HTTP/1.1 200 OK"
+2025-03-31 01:30:47,558 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:30:48,701 - INFO - SPECTER model loaded successfully
+2025-03-31 01:33:42,221 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:33:42,222 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:34:18,055 - INFO - Starting application...
+2025-03-31 01:34:18,764 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:34:21,495 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:34:21,495 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:34:24,001 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:34:24,005 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:34:24,011 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:34:24,016 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:34:26,604 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:34:28,008 - INFO - SPECTER model loaded successfully
+2025-03-31 01:34:28,060 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:34:28,063 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:34:30,581 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:34:30,582 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:34:33,060 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:34:33,063 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:34:33,069 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:34:33,073 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:34:33,122 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:36:33,537 - INFO - Starting application...
+2025-03-31 01:36:33,560 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:36:36,402 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:36:36,403 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:36:38,991 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:36:38,995 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:36:39,001 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:36:39,007 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:36:39,032 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/get "HTTP/1.1 200 OK"
+2025-03-31 01:36:39,044 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:36:40,438 - INFO - SPECTER model loaded successfully
+2025-03-31 01:39:11,312 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:39:11,312 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:39:46,640 - INFO - Starting application...
+2025-03-31 01:39:47,365 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:39:50,249 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:39:50,249 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:40:24,414 - INFO - Starting application...
+2025-03-31 01:40:41,947 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:40:43,509 - INFO - SPECTER model loaded successfully
+2025-03-31 01:40:43,509 - WARNING - Very long text (73346 chars) truncated to 10000 chars
+2025-03-31 01:40:43,859 - WARNING - Very long text (26484 chars) truncated to 10000 chars
+2025-03-31 01:40:44,209 - WARNING - Very long text (76885 chars) truncated to 10000 chars
+2025-03-31 01:40:44,567 - WARNING - Very long text (40822 chars) truncated to 10000 chars
+2025-03-31 01:40:44,908 - WARNING - Very long text (12498 chars) truncated to 10000 chars
+2025-03-31 01:40:45,231 - WARNING - Very long text (29698 chars) truncated to 10000 chars
+2025-03-31 01:40:45,517 - WARNING - Very long text (50082 chars) truncated to 10000 chars
+2025-03-31 01:40:45,791 - WARNING - Very long text (45930 chars) truncated to 10000 chars
+2025-03-31 01:40:46,077 - WARNING - Very long text (21368 chars) truncated to 10000 chars
+2025-03-31 01:40:46,405 - WARNING - Very long text (61957 chars) truncated to 10000 chars
+2025-03-31 01:40:47,039 - WARNING - Very long text (69260 chars) truncated to 10000 chars
+2025-03-31 01:40:47,373 - WARNING - Very long text (81264 chars) truncated to 10000 chars
+2025-03-31 01:40:47,703 - WARNING - Very long text (44847 chars) truncated to 10000 chars
+2025-03-31 01:40:48,031 - WARNING - Very long text (38589 chars) truncated to 10000 chars
+2025-03-31 01:40:48,362 - WARNING - Very long text (67172 chars) truncated to 10000 chars
+2025-03-31 01:40:48,696 - WARNING - Very long text (49776 chars) truncated to 10000 chars
+2025-03-31 01:40:49,021 - WARNING - Very long text (55146 chars) truncated to 10000 chars
+2025-03-31 01:40:49,350 - WARNING - Very long text (72765 chars) truncated to 10000 chars
+2025-03-31 01:40:49,685 - WARNING - Very long text (47136 chars) truncated to 10000 chars
+2025-03-31 01:40:50,023 - WARNING - Very long text (23953 chars) truncated to 10000 chars
+2025-03-31 01:40:50,354 - WARNING - Very long text (43456 chars) truncated to 10000 chars
+2025-03-31 01:40:50,683 - WARNING - Very long text (78252 chars) truncated to 10000 chars
+2025-03-31 01:40:51,006 - WARNING - Very long text (58865 chars) truncated to 10000 chars
+2025-03-31 01:40:51,335 - WARNING - Very long text (58910 chars) truncated to 10000 chars
+2025-03-31 01:40:51,705 - WARNING - Very long text (56370 chars) truncated to 10000 chars
+2025-03-31 01:40:52,060 - WARNING - Very long text (85222 chars) truncated to 10000 chars
+2025-03-31 01:40:52,390 - WARNING - Very long text (50117 chars) truncated to 10000 chars
+2025-03-31 01:40:52,726 - WARNING - Very long text (50269 chars) truncated to 10000 chars
+2025-03-31 01:40:53,063 - WARNING - Very long text (51209 chars) truncated to 10000 chars
+2025-03-31 01:40:53,432 - WARNING - Very long text (22836 chars) truncated to 10000 chars
+2025-03-31 01:40:53,794 - WARNING - Very long text (23703 chars) truncated to 10000 chars
+2025-03-31 01:40:54,129 - WARNING - Very long text (30457 chars) truncated to 10000 chars
+2025-03-31 01:40:54,471 - WARNING - Very long text (58013 chars) truncated to 10000 chars
+2025-03-31 01:40:54,813 - WARNING - Very long text (57784 chars) truncated to 10000 chars
+2025-03-31 01:40:55,173 - WARNING - Very long text (58711 chars) truncated to 10000 chars
+2025-03-31 01:40:55,539 - WARNING - Very long text (60133 chars) truncated to 10000 chars
+2025-03-31 01:40:56,232 - WARNING - Very long text (42217 chars) truncated to 10000 chars
+2025-03-31 01:40:56,680 - WARNING - Very long text (55358 chars) truncated to 10000 chars
+2025-03-31 01:40:57,101 - WARNING - Very long text (28528 chars) truncated to 10000 chars
+2025-03-31 01:40:57,468 - WARNING - Very long text (104324 chars) truncated to 10000 chars
+2025-03-31 01:40:57,814 - WARNING - Very long text (82227 chars) truncated to 10000 chars
+2025-03-31 01:40:58,172 - WARNING - Very long text (41686 chars) truncated to 10000 chars
+2025-03-31 01:40:58,538 - WARNING - Very long text (22578 chars) truncated to 10000 chars
+2025-03-31 01:40:58,895 - WARNING - Very long text (63989 chars) truncated to 10000 chars
+2025-03-31 01:40:59,250 - WARNING - Very long text (60598 chars) truncated to 10000 chars
+2025-03-31 01:40:59,594 - WARNING - Very long text (93729 chars) truncated to 10000 chars
+2025-03-31 01:40:59,944 - WARNING - Very long text (39080 chars) truncated to 10000 chars
+2025-03-31 01:41:00,293 - WARNING - Very long text (87984 chars) truncated to 10000 chars
+2025-03-31 01:41:00,656 - WARNING - Very long text (65854 chars) truncated to 10000 chars
+2025-03-31 01:41:01,014 - WARNING - Very long text (19010 chars) truncated to 10000 chars
+2025-03-31 01:41:01,367 - WARNING - Very long text (78517 chars) truncated to 10000 chars
+2025-03-31 01:41:01,736 - WARNING - Very long text (35105 chars) truncated to 10000 chars
+2025-03-31 01:41:02,097 - WARNING - Very long text (36829 chars) truncated to 10000 chars
+2025-03-31 01:41:02,458 - WARNING - Very long text (37810 chars) truncated to 10000 chars
+2025-03-31 01:41:02,828 - WARNING - Very long text (64562 chars) truncated to 10000 chars
+2025-03-31 01:41:03,180 - WARNING - Very long text (61557 chars) truncated to 10000 chars
+2025-03-31 01:41:03,529 - WARNING - Very long text (73233 chars) truncated to 10000 chars
+2025-03-31 01:41:03,880 - WARNING - Very long text (58524 chars) truncated to 10000 chars
+2025-03-31 01:41:04,238 - WARNING - Very long text (109808 chars) truncated to 10000 chars
+2025-03-31 01:41:04,620 - WARNING - Very long text (43944 chars) truncated to 10000 chars
+2025-03-31 01:41:04,973 - WARNING - Very long text (33779 chars) truncated to 10000 chars
+2025-03-31 01:41:05,323 - WARNING - Very long text (72499 chars) truncated to 10000 chars
+2025-03-31 01:41:05,652 - WARNING - Very long text (32414 chars) truncated to 10000 chars
+2025-03-31 01:41:06,005 - WARNING - Very long text (64382 chars) truncated to 10000 chars
+2025-03-31 01:41:06,380 - WARNING - Very long text (21467 chars) truncated to 10000 chars
+2025-03-31 01:41:06,766 - WARNING - Very long text (49349 chars) truncated to 10000 chars
+2025-03-31 01:41:07,199 - WARNING - Very long text (54194 chars) truncated to 10000 chars
+2025-03-31 01:41:07,656 - WARNING - Very long text (31640 chars) truncated to 10000 chars
+2025-03-31 01:41:08,243 - WARNING - Very long text (42323 chars) truncated to 10000 chars
+2025-03-31 01:41:08,642 - WARNING - Very long text (52023 chars) truncated to 10000 chars
+2025-03-31 01:41:09,006 - WARNING - Very long text (53617 chars) truncated to 10000 chars
+2025-03-31 01:41:09,368 - WARNING - Very long text (56381 chars) truncated to 10000 chars
+2025-03-31 01:41:09,775 - WARNING - Very long text (78680 chars) truncated to 10000 chars
+2025-03-31 01:41:10,169 - WARNING - Very long text (41201 chars) truncated to 10000 chars
+2025-03-31 01:41:10,551 - WARNING - Very long text (30854 chars) truncated to 10000 chars
+2025-03-31 01:41:10,912 - WARNING - Very long text (25713 chars) truncated to 10000 chars
+2025-03-31 01:41:11,260 - WARNING - Very long text (45129 chars) truncated to 10000 chars
+2025-03-31 01:41:11,686 - WARNING - Very long text (70097 chars) truncated to 10000 chars
+2025-03-31 01:41:12,150 - WARNING - Very long text (43508 chars) truncated to 10000 chars
+2025-03-31 01:41:12,581 - WARNING - Very long text (33947 chars) truncated to 10000 chars
+2025-03-31 01:41:12,958 - WARNING - Very long text (25449 chars) truncated to 10000 chars
+2025-03-31 01:41:13,328 - WARNING - Very long text (41920 chars) truncated to 10000 chars
+2025-03-31 01:41:13,702 - WARNING - Very long text (34931 chars) truncated to 10000 chars
+2025-03-31 01:41:14,086 - WARNING - Very long text (39783 chars) truncated to 10000 chars
+2025-03-31 01:41:14,560 - WARNING - Very long text (20172 chars) truncated to 10000 chars
+2025-03-31 01:41:14,941 - WARNING - Very long text (46291 chars) truncated to 10000 chars
+2025-03-31 01:41:15,318 - WARNING - Very long text (42459 chars) truncated to 10000 chars
+2025-03-31 01:41:15,752 - WARNING - Very long text (56278 chars) truncated to 10000 chars
+2025-03-31 01:41:16,158 - WARNING - Very long text (38675 chars) truncated to 10000 chars
+2025-03-31 01:41:16,577 - WARNING - Very long text (44880 chars) truncated to 10000 chars
+2025-03-31 01:41:17,035 - WARNING - Very long text (40416 chars) truncated to 10000 chars
+2025-03-31 01:41:17,430 - WARNING - Very long text (59782 chars) truncated to 10000 chars
+2025-03-31 01:41:17,856 - WARNING - Very long text (43908 chars) truncated to 10000 chars
+2025-03-31 01:41:18,349 - WARNING - Very long text (34633 chars) truncated to 10000 chars
+2025-03-31 01:41:18,748 - WARNING - Very long text (92544 chars) truncated to 10000 chars
+2025-03-31 01:41:19,117 - WARNING - Very long text (49547 chars) truncated to 10000 chars
+2025-03-31 01:41:19,481 - WARNING - Very long text (45278 chars) truncated to 10000 chars
+2025-03-31 01:41:19,985 - WARNING - Very long text (38930 chars) truncated to 10000 chars
+2025-03-31 01:41:20,392 - WARNING - Very long text (45216 chars) truncated to 10000 chars
+2025-03-31 01:41:20,750 - WARNING - Very long text (27136 chars) truncated to 10000 chars
+2025-03-31 01:41:21,119 - WARNING - Very long text (98136 chars) truncated to 10000 chars
+2025-03-31 01:41:21,444 - WARNING - Very long text (49645 chars) truncated to 10000 chars
+2025-03-31 01:41:21,824 - WARNING - Very long text (97125 chars) truncated to 10000 chars
+2025-03-31 01:41:22,225 - WARNING - Very long text (70430 chars) truncated to 10000 chars
+2025-03-31 01:41:22,884 - WARNING - Very long text (28064 chars) truncated to 10000 chars
+2025-03-31 01:41:23,205 - WARNING - Very long text (78732 chars) truncated to 10000 chars
+2025-03-31 01:41:23,495 - WARNING - Very long text (31494 chars) truncated to 10000 chars
+2025-03-31 01:41:23,879 - WARNING - Very long text (54299 chars) truncated to 10000 chars
+2025-03-31 01:41:24,254 - WARNING - Very long text (65349 chars) truncated to 10000 chars
+2025-03-31 01:41:24,629 - WARNING - Very long text (26970 chars) truncated to 10000 chars
+2025-03-31 01:41:24,972 - WARNING - Very long text (69240 chars) truncated to 10000 chars
+2025-03-31 01:41:25,350 - WARNING - Very long text (63000 chars) truncated to 10000 chars
+2025-03-31 01:41:25,752 - WARNING - Very long text (66259 chars) truncated to 10000 chars
+2025-03-31 01:41:26,166 - WARNING - Very long text (31029 chars) truncated to 10000 chars
+2025-03-31 01:41:26,597 - WARNING - Very long text (48159 chars) truncated to 10000 chars
+2025-03-31 01:41:27,059 - WARNING - Very long text (99422 chars) truncated to 10000 chars
+2025-03-31 01:41:27,521 - WARNING - Very long text (61833 chars) truncated to 10000 chars
+2025-03-31 01:41:27,910 - WARNING - Very long text (77323 chars) truncated to 10000 chars
+2025-03-31 01:41:28,291 - WARNING - Very long text (80465 chars) truncated to 10000 chars
+2025-03-31 01:41:28,605 - WARNING - Very long text (87290 chars) truncated to 10000 chars
+2025-03-31 01:41:28,903 - WARNING - Very long text (72721 chars) truncated to 10000 chars
+2025-03-31 01:41:29,179 - WARNING - Very long text (47747 chars) truncated to 10000 chars
+2025-03-31 01:41:29,515 - WARNING - Very long text (36418 chars) truncated to 10000 chars
+2025-03-31 01:41:29,858 - WARNING - Very long text (72927 chars) truncated to 10000 chars
+2025-03-31 01:41:30,179 - WARNING - Very long text (84380 chars) truncated to 10000 chars
+2025-03-31 01:41:30,487 - WARNING - Very long text (41687 chars) truncated to 10000 chars
+2025-03-31 01:41:30,757 - WARNING - Very long text (48815 chars) truncated to 10000 chars
+2025-03-31 01:41:31,125 - WARNING - Very long text (42478 chars) truncated to 10000 chars
+2025-03-31 01:41:31,542 - WARNING - Very long text (73826 chars) truncated to 10000 chars
+2025-03-31 01:41:32,002 - WARNING - Very long text (43412 chars) truncated to 10000 chars
+2025-03-31 01:41:32,489 - WARNING - Very long text (44837 chars) truncated to 10000 chars
+2025-03-31 01:41:32,918 - WARNING - Very long text (91271 chars) truncated to 10000 chars
+2025-03-31 01:41:33,285 - WARNING - Very long text (75654 chars) truncated to 10000 chars
+2025-03-31 01:41:33,684 - WARNING - Very long text (58721 chars) truncated to 10000 chars
+2025-03-31 01:41:34,077 - WARNING - Very long text (66273 chars) truncated to 10000 chars
+2025-03-31 01:41:34,883 - WARNING - Very long text (16160 chars) truncated to 10000 chars
+2025-03-31 01:41:35,270 - WARNING - Very long text (62889 chars) truncated to 10000 chars
+2025-03-31 01:41:35,740 - WARNING - Very long text (94085 chars) truncated to 10000 chars
+2025-03-31 01:41:36,155 - WARNING - Very long text (44548 chars) truncated to 10000 chars
+2025-03-31 01:41:36,566 - WARNING - Very long text (88558 chars) truncated to 10000 chars
+2025-03-31 01:42:38,695 - INFO - Starting application...
+2025-03-31 01:42:59,020 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:43:00,316 - INFO - SPECTER model loaded successfully
+2025-03-31 01:43:16,227 - WARNING - Very long text (104324 chars) truncated to 10000 chars
+2025-03-31 01:43:24,509 - WARNING - Very long text (109808 chars) truncated to 10000 chars
+2025-03-31 01:45:00,972 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:45:00,972 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:45:21,347 - INFO - Starting application...
+2025-03-31 01:45:38,035 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:45:39,400 - INFO - SPECTER model loaded successfully
+2025-03-31 01:45:54,549 - WARNING - Very long text (104324 chars) truncated to 10000 chars
+2025-03-31 01:46:02,062 - WARNING - Very long text (109808 chars) truncated to 10000 chars
+2025-03-31 01:46:50,485 - INFO - Starting application...
+2025-03-31 01:46:51,200 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:46:53,991 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:46:53,991 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:46:56,483 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:46:56,487 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:46:56,493 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:46:56,499 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:46:59,220 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:47:00,492 - INFO - SPECTER model loaded successfully
+2025-03-31 01:47:00,547 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:47:00,549 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:47:03,100 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:47:03,101 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:47:05,673 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:47:05,676 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:47:05,682 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:47:05,687 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:47:05,740 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:49:08,505 - INFO - Starting application...
+2025-03-31 01:49:21,700 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:49:23,051 - INFO - SPECTER model loaded successfully
+2025-03-31 01:49:24,632 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 01:49:27,759 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 01:49:32,446 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 01:49:38,393 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 01:49:39,539 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 01:49:47,069 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 01:49:50,131 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 01:49:51,452 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 01:49:52,931 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 01:49:54,066 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 01:50:38,386 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:50:38,386 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:50:57,905 - INFO - Starting application...
+2025-03-31 01:51:08,548 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:51:09,948 - INFO - SPECTER model loaded successfully
+2025-03-31 01:51:11,478 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 01:51:14,663 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 01:51:19,849 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 01:51:26,721 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 01:51:27,893 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 01:51:36,088 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 01:51:39,298 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 01:51:40,846 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 01:51:42,428 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 01:51:43,945 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 01:52:00,948 - INFO - Starting application...
+2025-03-31 01:52:01,669 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:52:04,517 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:52:04,518 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:52:07,015 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:52:07,020 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:52:07,027 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:52:07,032 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:52:10,035 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:52:11,293 - INFO - SPECTER model loaded successfully
+2025-03-31 01:52:11,343 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:52:11,346 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:52:13,921 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:52:13,922 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:52:16,419 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:52:16,422 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:52:16,429 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:52:16,435 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:52:16,504 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:55:01,359 - INFO - Starting application...
+2025-03-31 01:55:13,938 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:55:15,233 - INFO - SPECTER model loaded successfully
+2025-03-31 01:55:16,866 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 01:55:20,334 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 01:55:25,523 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 01:55:32,374 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 01:55:33,620 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 01:55:42,629 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 01:55:46,194 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 01:55:47,814 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 01:55:49,548 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 01:55:50,817 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 01:56:31,560 - INFO - Use pytorch device_name: cpu
+2025-03-31 01:56:31,561 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 01:56:50,838 - INFO - Starting application...
+2025-03-31 01:57:01,710 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:57:02,904 - INFO - SPECTER model loaded successfully
+2025-03-31 01:57:04,378 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 01:57:07,224 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 01:57:11,853 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 01:57:18,043 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 01:57:19,294 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 01:57:27,277 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 01:57:30,319 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 01:57:31,658 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 01:57:33,048 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 01:57:34,262 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 01:57:51,801 - INFO - Starting application...
+2025-03-31 01:57:52,530 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:57:55,406 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:57:55,406 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:57:57,933 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:57:57,936 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:57:57,944 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:57:57,948 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:58:00,976 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 01:58:02,372 - INFO - SPECTER model loaded successfully
+2025-03-31 01:58:02,426 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 01:58:02,427 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:58:04,978 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 01:58:04,978 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 01:58:07,488 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 01:58:07,490 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 01:58:07,496 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 01:58:07,501 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 01:58:07,551 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:00:04,848 - INFO - Starting application...
+2025-03-31 02:00:27,298 - INFO - Starting application...
+2025-03-31 02:00:42,397 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:00:43,978 - INFO - SPECTER model loaded successfully
+2025-03-31 02:00:46,315 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 02:00:50,477 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 02:00:57,298 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 02:01:06,139 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 02:01:07,666 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 02:01:19,426 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 02:01:23,733 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 02:01:25,816 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 02:01:27,921 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 02:01:29,511 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 02:01:52,253 - INFO - Starting application...
+2025-03-31 02:01:53,249 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:01:56,213 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:01:56,214 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:01:58,774 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:01:58,777 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:01:58,786 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:01:58,791 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:02:02,790 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:02:04,800 - INFO - SPECTER model loaded successfully
+2025-03-31 02:02:06,911 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:02:06,913 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:02:09,489 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:02:09,490 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:02:12,138 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:02:12,143 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:02:12,154 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:02:12,162 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:02:12,238 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:04:11,506 - INFO - Starting application...
+2025-03-31 02:04:31,208 - INFO - Starting application...
+2025-03-31 02:04:46,423 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:04:47,891 - INFO - SPECTER model loaded successfully
+2025-03-31 02:04:50,544 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 02:04:55,245 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 02:05:02,666 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 02:05:12,736 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 02:05:14,478 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 02:05:25,649 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 02:05:30,726 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 02:05:32,954 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 02:05:35,201 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 02:05:36,854 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 02:05:59,984 - INFO - Starting application...
+2025-03-31 02:06:00,875 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:06:03,971 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:06:03,971 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:06:06,621 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:06:06,625 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:06:06,636 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:06:06,643 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:06:10,547 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:06:12,286 - INFO - SPECTER model loaded successfully
+2025-03-31 02:06:14,415 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:06:14,418 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:06:17,049 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:06:17,050 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:06:19,722 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:06:19,727 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:06:19,737 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:06:19,744 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:06:19,861 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:08:44,549 - INFO - Starting application...
+2025-03-31 02:09:06,388 - INFO - Starting application...
+2025-03-31 02:09:24,068 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:09:26,000 - INFO - SPECTER model loaded successfully
+2025-03-31 02:09:28,261 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 02:09:33,338 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 02:09:40,789 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 02:09:49,880 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 02:09:51,482 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 02:10:01,546 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 02:10:06,033 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 02:10:08,354 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 02:10:10,845 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 02:10:12,626 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 02:10:38,645 - INFO - Starting application...
+2025-03-31 02:10:39,693 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:10:42,949 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:10:42,951 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:10:45,599 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:10:45,603 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:10:45,612 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:10:45,620 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:10:49,828 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:10:54,923 - INFO - SPECTER model loaded successfully
+2025-03-31 02:10:57,039 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:10:57,041 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:10:59,743 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:10:59,743 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:11:02,377 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:11:02,382 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:11:02,392 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:11:02,398 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:11:02,491 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:12:44,168 - INFO - Starting application...
+2025-03-31 02:13:36,353 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:13:40,562 - INFO - SPECTER model loaded successfully
+2025-03-31 02:15:04,543 - INFO - Use pytorch device_name: cpu
+2025-03-31 02:15:04,543 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 02:15:31,628 - INFO - Starting application...
+2025-03-31 02:15:53,088 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:16:00,355 - INFO - SPECTER model loaded successfully
+2025-03-31 02:16:02,597 - WARNING - Very long text (104119 chars) truncated to 10000 chars
+2025-03-31 02:16:07,197 - WARNING - Very long text (105301 chars) truncated to 10000 chars
+2025-03-31 02:16:14,193 - WARNING - Very long text (111668 chars) truncated to 10000 chars
+2025-03-31 02:16:25,359 - WARNING - Very long text (113432 chars) truncated to 10000 chars
+2025-03-31 02:16:27,245 - WARNING - Very long text (112119 chars) truncated to 10000 chars
+2025-03-31 02:16:38,824 - WARNING - Very long text (154239 chars) truncated to 10000 chars
+2025-03-31 02:16:43,472 - WARNING - Very long text (107659 chars) truncated to 10000 chars
+2025-03-31 02:16:45,558 - WARNING - Very long text (150214 chars) truncated to 10000 chars
+2025-03-31 02:16:47,791 - WARNING - Very long text (144214 chars) truncated to 10000 chars
+2025-03-31 02:16:49,556 - WARNING - Very long text (103905 chars) truncated to 10000 chars
+2025-03-31 02:17:11,648 - INFO - Starting application...
+2025-03-31 02:17:12,602 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:17:15,656 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:17:15,657 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:17:18,241 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:17:18,245 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:17:18,255 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:17:18,261 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:17:21,879 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:17:23,390 - INFO - SPECTER model loaded successfully
+2025-03-31 02:17:25,479 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:17:25,481 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:17:28,049 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:17:28,049 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:17:30,631 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:17:30,635 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:17:30,642 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:17:30,647 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:17:30,722 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:56:13,799 - INFO - Starting application...
+2025-03-31 02:56:34,317 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:56:35,458 - INFO - SPECTER model loaded successfully
+2025-03-31 02:56:41,172 - INFO - Use pytorch device_name: cpu
+2025-03-31 02:56:41,172 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 02:56:56,827 - INFO - Starting application...
+2025-03-31 02:56:58,308 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:57:00,351 - INFO - SPECTER model loaded successfully
+2025-03-31 02:57:03,358 - WARNING - Very long text (112928 chars) truncated to 100000 chars
+2025-03-31 02:57:05,302 - WARNING - Very long text (135760 chars) truncated to 100000 chars
+2025-03-31 02:57:50,671 - INFO - Starting application...
+2025-03-31 02:57:51,503 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:57:54,345 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:57:54,346 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:57:56,870 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:57:56,873 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:57:56,883 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:57:56,888 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:57:59,677 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 02:58:01,103 - INFO - SPECTER model loaded successfully
+2025-03-31 02:58:01,181 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 02:58:01,183 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:58:03,726 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 02:58:03,727 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 02:58:06,237 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 02:58:06,244 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 02:58:06,255 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 02:58:06,265 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 02:58:06,359 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 03:00:30,513 - INFO - Starting application...
+2025-03-31 03:00:50,449 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:00:51,825 - INFO - SPECTER model loaded successfully
+2025-03-31 03:00:56,818 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:00:56,818 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 03:01:21,087 - INFO - Starting application...
+2025-03-31 03:01:39,597 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:01:40,760 - INFO - SPECTER model loaded successfully
+2025-03-31 03:01:45,979 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:01:45,980 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 03:03:53,804 - INFO - Starting application...
+2025-03-31 03:04:11,561 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:04:12,793 - INFO - SPECTER model loaded successfully
+2025-03-31 03:04:17,922 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:04:17,922 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 03:09:13,502 - INFO - Starting application...
+2025-03-31 03:09:33,334 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:09:34,527 - INFO - SPECTER model loaded successfully
+2025-03-31 03:09:39,516 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:09:39,516 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 03:11:23,469 - INFO - Starting application...
+2025-03-31 03:11:54,797 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:11:56,022 - INFO - SPECTER model loaded successfully
+2025-03-31 03:12:09,470 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:12:09,470 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-31 03:12:26,019 - INFO - Starting application...
+2025-03-31 03:12:30,740 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:12:31,952 - INFO - SPECTER model loaded successfully
+2025-03-31 03:12:36,619 - WARNING - Very long text (171815 chars) truncated to 100000 chars
+2025-03-31 03:12:40,698 - WARNING - Very long text (112928 chars) truncated to 100000 chars
+2025-03-31 03:12:42,297 - WARNING - Very long text (461241 chars) truncated to 100000 chars
+2025-03-31 03:12:43,904 - WARNING - Very long text (112788 chars) truncated to 100000 chars
+2025-03-31 03:12:44,350 - WARNING - Very long text (135760 chars) truncated to 100000 chars
+2025-03-31 03:12:45,211 - WARNING - Very long text (112996 chars) truncated to 100000 chars
+2025-03-31 03:12:47,253 - WARNING - Very long text (139798 chars) truncated to 100000 chars
+2025-03-31 03:12:48,566 - WARNING - Very long text (136483 chars) truncated to 100000 chars
+2025-03-31 03:12:49,462 - WARNING - Very long text (103905 chars) truncated to 100000 chars
+2025-03-31 03:13:06,187 - INFO - Starting application...
+2025-03-31 03:13:06,890 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 03:13:09,691 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 03:13:09,692 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 03:13:12,250 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 03:13:12,253 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 03:13:12,260 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 03:13:12,265 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 03:13:15,085 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:13:16,727 - INFO - SPECTER model loaded successfully
+2025-03-31 03:13:16,784 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 03:13:16,786 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 03:13:19,312 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-31 03:13:19,313 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-31 03:13:21,789 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-31 03:13:21,792 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-31 03:13:21,798 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-31 03:13:21,802 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/count "HTTP/1.1 200 OK"
+2025-03-31 03:13:21,854 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5d7e5e63-f3ee-4f66-936f-fd675c17f474/query "HTTP/1.1 200 OK"
+2025-03-31 03:21:22,695 - INFO - Starting application...
+2025-03-31 03:22:34,981 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-31 03:22:36,304 - INFO - SPECTER model loaded successfully
+2025-03-31 03:22:54,092 - INFO - Use pytorch device_name: cpu
+2025-03-31 03:22:54,092 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2

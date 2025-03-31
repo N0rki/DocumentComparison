@@ -5,6 +5,10 @@ import numpy as np
 import json
 import requests
 import feedparser
+import torch
+import torch.nn as nn
+import networkx as nx
+from lstm.model_lstm import LinkPredictorLSTM
 from scholarly import scholarly
 import time
 from sklearn.metrics import silhouette_score
@@ -29,10 +33,15 @@ from PyPDF2 import PdfReader
 from summarizer import summarize_text
 from summarizer import chunk_and_summarize
 from datetime import datetime
+from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.spatial.distance import euclidean, cityblock
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from collections import Counter
 
 class DataLoader:
     @staticmethod
-    @st.cache_data()
     def load_data():
         try:
             st.write("Attempting to connect to ChromaDB...")
@@ -94,7 +103,6 @@ class DataLoader:
 
 class DimensionalityReducer:
     @staticmethod
-    @st.cache_data
     def reduce_embeddings(embeddings, method, n_components):
         if method == "PCA":
             reducer = PCA(n_components=n_components)
@@ -108,39 +116,54 @@ class DimensionalityReducer:
 
 class Clusterer:
     @staticmethod
-    @st.cache_data
-    def cluster_documents(embeddings, algorithm, n_clusters):
+    def cluster_documents(embeddings, algorithm, n_clusters=None):
         if algorithm == "K-Means":
+            if n_clusters is None:
+                n_clusters = 5
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
             cluster_labels = kmeans.fit_predict(embeddings)
         elif algorithm == "DBSCAN":
             dbscan = DBSCAN(eps=0.5, min_samples=5)
             cluster_labels = dbscan.fit_predict(embeddings)
         elif algorithm == "Hierarchical":
+            if n_clusters is None:
+                n_clusters = 5
             hierarchical = AgglomerativeClustering(n_clusters=n_clusters)
             cluster_labels = hierarchical.fit_predict(embeddings)
         elif algorithm == "GMM":
+            if n_clusters is None:
+                n_clusters = 5
             gmm = GaussianMixture(n_components=n_clusters, random_state=42)
             cluster_labels = gmm.fit_predict(embeddings)
         else:
             raise ValueError("Unsupported clustering algorithm")
+
         return cluster_labels
 
     @staticmethod
-    @st.cache_data
     def assign_categories_to_clusters(cluster_labels, embeddings, predefined_categories):
-        category_embeddings = {category: vectorize_text_specter(category) for category in predefined_categories}
-        cluster_to_category = {}
         unique_clusters = np.unique(cluster_labels)
+        cluster_to_category = {}
+
+        if -1 in unique_clusters:
+            cluster_to_category[-1] = "Noise"
+            unique_clusters = unique_clusters[unique_clusters != -1]
+
+        category_embeddings = {category: vectorize_text_specter(category)
+                              for category in predefined_categories}
 
         for cluster_id in unique_clusters:
-            cluster_id_int = int(cluster_id)
             cluster_mask = cluster_labels == cluster_id
             cluster_embeddings = embeddings[cluster_mask]
-            avg_cluster_embedding = np.mean(cluster_embeddings, axis=0).reshape(1, -1)
 
-            max_similarity = -1
+            if len(cluster_embeddings) == 0:
+                cluster_to_category[cluster_id] = f"Cluster {cluster_id}"
+                continue
+
+            avg_cluster_embedding = np.mean(cluster_embeddings, axis=0).reshape(1, -1)
             best_category = None
+            max_similarity = -1
+
             for category, category_embedding in category_embeddings.items():
                 category_embedding = np.array(category_embedding).reshape(1, -1)
                 similarity = cosine_similarity(avg_cluster_embedding, category_embedding)[0][0]
@@ -148,13 +171,7 @@ class Clusterer:
                     max_similarity = similarity
                     best_category = category
 
-            cluster_to_category[cluster_id_int] = best_category
-
-        if len(unique_clusters) > len(predefined_categories):
-            for cluster_id in unique_clusters:
-                cluster_id_int = int(cluster_id)
-                if cluster_id_int >= len(predefined_categories):
-                    cluster_to_category[cluster_id_int] = f"Cluster {cluster_id_int + 1}"
+            cluster_to_category[cluster_id] = best_category if max_similarity > 0.3 else f"Cluster {cluster_id}"
 
         return cluster_to_category
 
@@ -428,6 +445,38 @@ class SemanticSearch:
 
         return df_sorted.head(top_k)
 
+@st.cache_resource
+def load_link_model(model_path="lstm/link_predictor_lstm.pt"):
+    model = LinkPredictorLSTM()
+    abs_path = os.path.join(os.path.dirname(__file__), model_path)
+    model.load_state_dict(torch.load(abs_path, map_location="cpu"))
+    model.eval()
+    return model
+
+def predict_link_score(emb1, emb2, model):
+    diff = np.abs(emb1 - emb2)
+    x = np.concatenate([emb1, emb2, diff])
+    x_tensor = torch.tensor(x, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+    with torch.no_grad():
+        score = model(x_tensor).item()
+    return score
+
+def build_dynamic_graph(filtered_df, model, threshold=0.8):
+    G = nx.Graph()
+    for i, row in filtered_df.iterrows():
+        G.add_node(row["title"], metadata=row)
+
+    embeddings = filtered_df["embedding"].tolist()
+    titles = filtered_df["title"].tolist()
+
+    for i in range(len(embeddings)):
+        for j in range(i+1, len(embeddings)):
+            score = predict_link_score(np.array(embeddings[i]), np.array(embeddings[j]), model)
+            if score >= threshold:
+                G.add_edge(titles[i], titles[j], weight=score)
+
+    return G
+
 def preprocess_query(query):
     spell = SpellChecker()
     corrected_query = " ".join([spell.correction(word) for word in query.split()])
@@ -481,6 +530,52 @@ def calculate_inertia(embeddings, max_clusters=10):
         inertia_values.append(kmeans.inertia_)
     return inertia_values
 
+def compare_documents(embeddings_dict, abstracts_dict, cluster_labels):
+    st.markdown("### 🔍 Compare Two Documents")
+
+    with st.expander("📄 Document Comparison Tool (Side-by-Side)", expanded=False):
+        doc_ids = list(abstracts_dict.keys())
+        if len(doc_ids) < 2:
+            st.warning("Need at least 2 documents to compare.")
+            return
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            doc_a = st.selectbox("Select Document A", doc_ids, key="doc_a")
+        with col2:
+            doc_b = st.selectbox("Select Document B", [d for d in doc_ids if d != doc_a], key="doc_b")
+
+        if doc_a and doc_b:
+            # Abstracts
+            st.markdown("#### 📘 Abstracts")
+            col1, col2 = st.columns(2)
+            col1.markdown(f"**{doc_a}**")
+            col1.info(abstracts_dict.get(doc_a, "No abstract available."))
+            col2.markdown(f"**{doc_b}**")
+            col2.info(abstracts_dict.get(doc_b, "No abstract available."))
+
+            # Cosine Similarity
+            vec_a = embeddings_dict[doc_a].reshape(1, -1)
+            vec_b = embeddings_dict[doc_b].reshape(1, -1)
+            sim = cosine_similarity(vec_a, vec_b)[0][0]
+            st.markdown(f"**🧠 Cosine Similarity:** `{sim:.4f}`")
+
+            # Cluster Match
+            cluster_a = cluster_labels.get(doc_a, "N/A")
+            cluster_b = cluster_labels.get(doc_b, "N/A")
+            same_cluster = cluster_a == cluster_b
+            st.markdown(f"**🧩 Same Cluster:** {'✅ Yes' if same_cluster else '❌ No'} (A: {cluster_a}, B: {cluster_b})")
+
+            # Shared Keywords (basic TF-IDF)
+            vect = TfidfVectorizer(stop_words='english', max_features=100)
+            vect.fit([abstracts_dict[doc_a], abstracts_dict[doc_b]])
+            keywords_a = set(vect.build_analyzer()(abstracts_dict[doc_a]))
+            keywords_b = set(vect.build_analyzer()(abstracts_dict[doc_b]))
+            shared_keywords = keywords_a & keywords_b
+            st.markdown("**🔁 Shared Keywords:**")
+            st.write(", ".join(shared_keywords) if shared_keywords else "None found")
+
 def calculate_silhouette_scores(embeddings, max_clusters=10):
     silhouette_scores = []
     for n_clusters in range(2, max_clusters + 1):
@@ -496,7 +591,6 @@ def extract_text_from_pdf(pdf_path):
     for page in reader.pages:
         text += page.extract_text()
     return text
-
 
 def add_pdf_summarization():
     st.sidebar.subheader("PDF Summarization")
@@ -546,15 +640,13 @@ def main():
     st.title("Interactive Document Dashboard")
     st.sidebar.header("Filters and Settings")
 
-    if "df" not in st.session_state:
-        st.session_state.df = load_data()
-
-    if st.session_state.df.empty:
+    df = DataLoader.load_data()
+    if df.empty:
         st.warning("No data found in ChromaDB. Please add documents first.")
         return
 
     st.sidebar.subheader("Filter by Year")
-    min_year = int(st.session_state.df["year"].min())
+    min_year = int(df["year"].min())
     current_year = datetime.now().year
 
     year_range = st.sidebar.slider(
@@ -565,13 +657,12 @@ def main():
         help="Filter documents by publication year."
     )
 
-    filtered_df = st.session_state.df[
-        (st.session_state.df["year"] >= year_range[0]) &
-        (st.session_state.df["year"] <= year_range[1])
+    filtered_df = df[
+        (df["year"] >= year_range[0]) &
+        (df["year"] <= year_range[1])
     ]
 
-    if "embeddings" not in st.session_state:
-        st.session_state.embeddings = np.array(filtered_df["embedding"].tolist())
+    embeddings = np.array(filtered_df["embedding"].tolist())
 
     clustering_algorithm = st.sidebar.selectbox(
         "Select Clustering Algorithm",
@@ -580,10 +671,10 @@ def main():
     )
 
     if clustering_algorithm in ["K-Means", "Hierarchical", "GMM"]:
-        max_clusters = 10
+        max_clusters = 30
 
-        inertia_values = calculate_inertia(st.session_state.embeddings, max_clusters)
-        silhouette_scores = calculate_silhouette_scores(st.session_state.embeddings, max_clusters)
+        inertia_values = calculate_inertia(embeddings, max_clusters)
+        silhouette_scores = calculate_silhouette_scores(embeddings, max_clusters)
 
         st.sidebar.subheader("Cluster Optimization Methods")
 
@@ -639,23 +730,19 @@ def main():
     else:
         n_clusters = None
 
-    if "cluster_labels" not in st.session_state or clustering_algorithm != st.session_state.get("last_clustering_algorithm") or n_clusters != st.session_state.get("last_n_clusters"):
-        st.session_state.cluster_labels = Clusterer.cluster_documents(
-            st.session_state.embeddings,
-            algorithm=clustering_algorithm,
-            n_clusters=n_clusters
-        )
-        st.session_state.last_clustering_algorithm = clustering_algorithm
-        st.session_state.last_n_clusters = n_clusters
+    cluster_labels = Clusterer.cluster_documents(
+        embeddings,
+        algorithm=clustering_algorithm,
+        n_clusters=n_clusters
+    )
 
-    if "cluster_to_category" not in st.session_state:
-        st.session_state.cluster_to_category = Clusterer.assign_categories_to_clusters(
-            st.session_state.cluster_labels,
-            st.session_state.embeddings,
-            PREDEFINED_CATEGORIES
-        )
+    cluster_to_category = Clusterer.assign_categories_to_clusters(
+        cluster_labels,
+        embeddings,
+        PREDEFINED_CATEGORIES
+    )
 
-    filtered_df["cluster"] = [st.session_state.cluster_to_category[label] for label in st.session_state.cluster_labels]
+    filtered_df["cluster"] = [cluster_to_category[label] for label in cluster_labels]
 
     reduction_method = st.sidebar.selectbox(
         "Select Method",
@@ -668,22 +755,19 @@ def main():
         help="Choose whether to visualize the data in 2D or 3D."
     )
 
-    if "reduced_embeddings" not in st.session_state or reduction_method != st.session_state.get("last_reduction_method") or n_components != st.session_state.get("last_n_components"):
-        st.session_state.reduced_embeddings = DimensionalityReducer.reduce_embeddings(
-            st.session_state.embeddings,
-            method=reduction_method,
-            n_components=n_components
-        )
-        st.session_state.last_reduction_method = reduction_method
-        st.session_state.last_n_components = n_components
+    reduced_embeddings = DimensionalityReducer.reduce_embeddings(
+        embeddings,
+        method=reduction_method,
+        n_components=n_components
+    )
 
     if n_components == 2:
-        filtered_df["x"] = st.session_state.reduced_embeddings[:, 0]
-        filtered_df["y"] = st.session_state.reduced_embeddings[:, 1]
+        filtered_df["x"] = reduced_embeddings[:, 0]
+        filtered_df["y"] = reduced_embeddings[:, 1]
     elif n_components == 3:
-        filtered_df["x"] = st.session_state.reduced_embeddings[:, 0]
-        filtered_df["y"] = st.session_state.reduced_embeddings[:, 1]
-        filtered_df["z"] = st.session_state.reduced_embeddings[:, 2]
+        filtered_df["x"] = reduced_embeddings[:, 0]
+        filtered_df["y"] = reduced_embeddings[:, 1]
+        filtered_df["z"] = reduced_embeddings[:, 2]
 
     st.sidebar.subheader("Visualization Settings")
     use_custom_colors = st.sidebar.checkbox(
@@ -872,23 +956,10 @@ def main():
     st.plotly_chart(sankey_fig, use_container_width=True)
 
     st.sidebar.subheader("Search Documents")
-
     search_query = st.sidebar.text_input(
         "Search by Title, Author, or Abstract",
         key="search_documents_input",
         help="Enter a query to search for documents by title, author, or abstract."
-    )
-
-    st.sidebar.subheader("Search by Year")
-    min_year = 1991
-    current_year = datetime.now().year
-
-    year_range = st.sidebar.slider(
-        "Select Year Range",
-        min_value=min_year,
-        max_value=current_year,
-        value=(min_year, current_year),
-        help="Filter documents by publication year."
     )
 
     similarity_threshold = st.sidebar.slider(
@@ -900,49 +971,37 @@ def main():
         help="Set the minimum similarity score for documents to be included in the results."
     )
 
-    if search_query or year_range != (min_year, current_year):
-        corrected_query = preprocess_query(search_query) if search_query else ""
+    if search_query:
+        corrected_query = preprocess_query(search_query)
 
-        filtered_by_year = st.session_state.df[
-            (st.session_state.df["year"] >= year_range[0]) &
-            (st.session_state.df["year"] <= year_range[1])
-            ]
+        search_results = SemanticSearch.semantic_search(
+            filtered_df,
+            corrected_query,
+            top_k=5,
+            similarity_threshold=similarity_threshold
+        )
 
-        if search_query:
-            st.subheader("Search Results from Database")
-            search_results = SemanticSearch.semantic_search(
-                filtered_by_year,
-                corrected_query,
-                top_k=5,
-                similarity_threshold=similarity_threshold
-            )
-
-            if not search_results.empty:
-                st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
-            else:
-                st.warning("No documents found in the database for the search query above the similarity threshold.")
+        if not search_results.empty:
+            st.subheader("Search Results")
+            st.write(search_results[["title", "authors", "year", "abstract", "similarity"]])
         else:
-            st.subheader(f"Documents from {year_range[0]} to {year_range[1]}")
-            st.write(filtered_by_year[["title", "authors", "year", "abstract"]])
+            st.warning("No documents found for the search query above the similarity threshold.")
 
-        if search_query:
-            st.subheader("Related Articles from arXiv")
-            arxiv_articles = ExternalAPIs.fetch_arxiv_articles(
-                corrected_query,
-                max_results=50,
-                year_range=year_range
-            )
-            if arxiv_articles:
-                top_5_articles = arxiv_articles[:5]
-                for article in top_5_articles:
-                    st.write(f"**Title:** {article['title']}")
-                    st.write(f"**Authors:** {', '.join(article['authors'])}")
-                    st.write(f"**Published:** {article['published']}")
-                    st.write(f"**Summary:** {article['summary']}")
-                    st.write(f"**Link:** [Read Paper]({article['link']})")
-                    st.write("---")
-            else:
-                st.write("No related articles found in arXiv.")
+        st.subheader("Related Articles from arXiv")
+        arxiv_articles = ExternalAPIs.fetch_arxiv_articles(
+            corrected_query,
+            max_results=5
+        )
+        if arxiv_articles:
+            for article in arxiv_articles:
+                st.write(f"**Title:** {article['title']}")
+                st.write(f"**Authors:** {', '.join(article['authors'])}")
+                st.write(f"**Published:** {article['published']}")
+                st.write(f"**Summary:** {article['summary']}")
+                st.write(f"**Link:** [Read Paper]({article['link']})")
+                st.write("---")
+        else:
+            st.write("No related articles found in arXiv.")
 
     st.sidebar.subheader("Fetch Citation Count")
     citation_query = st.sidebar.text_input(
@@ -953,6 +1012,117 @@ def main():
     if citation_query:
         citation_count = ExternalAPIs.fetch_citation_count(citation_query)
         st.write(f"**Citation Count:** {citation_count}")
+
+    st.subheader("🔗 Dynamic Document Graph (LSTM-Based)")
+    with st.expander("View and Explore Dynamic Graph", expanded=False):
+
+        threshold = st.slider("Link prediction threshold", min_value=0.5, max_value=0.95, step=0.01, value=0.8)
+        model = load_link_model()
+        G = build_dynamic_graph(filtered_df, model, threshold=threshold)
+
+        st.markdown(f"📌 Graph contains `{len(G.nodes)}` documents and `{len(G.edges)}` predicted links")
+
+        # Optionally show network as edge list
+        if st.checkbox("Show edge list"):
+            edges = list(G.edges(data=True))
+            for u, v, data in edges:
+                st.write(f"{u} ↔ {v} (score: {data['weight']:.3f})")
+
+        # Optional: Visualize using pyvis or plotly
+        try:
+            from pyvis.network import Network
+            import streamlit.components.v1 as components
+
+            net = Network(height="600px", width="100%", notebook=False)
+            for node in G.nodes:
+                net.add_node(node, label=node, title=node)
+
+            for u, v, data in G.edges(data=True):
+                net.add_edge(u, v, value=data["weight"])
+
+            net.save_graph("graph.html")
+            with open("graph.html", "r", encoding="utf-8") as f:
+                html_content = f.read()
+            components.html(html_content, height=650, scrolling=True)
+
+        except Exception as e:
+            st.warning("Graph visualization skipped (install `pyvis` to enable).")
+            st.text(str(e))
+
+    st.subheader("📄 Document Comparison Tool (Side-by-Side)")
+    with st.expander("Compare Two Documents", expanded=False):
+
+        doc_titles = filtered_df["title"].tolist()
+
+        with st.form("compare_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                doc1_title = st.selectbox("Select Document 1", doc_titles, key="doc1")
+            with col2:
+                doc2_title = st.selectbox("Select Document 2", doc_titles, key="doc2")
+
+            submitted = st.form_submit_button("Compare")
+
+        if submitted:
+            doc1 = filtered_df[filtered_df["title"] == doc1_title].iloc[0]
+            doc2 = filtered_df[filtered_df["title"] == doc2_title].iloc[0]
+
+            emb1 = np.array(doc1["embedding"])
+            emb2 = np.array(doc2["embedding"])
+
+            sim_cosine = cosine_similarity(emb1.reshape(1, -1), emb2.reshape(1, -1))[0][0]
+            sim_euclidean = euclidean(emb1, emb2)
+            sim_manhattan = cityblock(emb1, emb2)
+            sim_dot = np.dot(emb1, emb2)
+
+            st.markdown("### 🔎 Similarity Metrics")
+            sim_df = pd.DataFrame({
+                "Metric": ["Cosine Similarity", "Euclidean Distance", "Manhattan Distance", "Dot Product"],
+                "Value": [f"{sim_cosine:.4f}", f"{sim_euclidean:.4f}", f"{sim_manhattan:.4f}", f"{sim_dot:.4f}"]
+            })
+            st.table(sim_df)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(f"### 📘 {doc1['title']}")
+                st.markdown(f"**Authors:** {doc1['authors']}")
+                st.markdown(f"**Year:** {doc1['year']}  \n**Cluster:** `{doc1['cluster']}`")
+                st.markdown("**Abstract:**")
+                st.write(doc1["abstract"])
+
+            with col2:
+                st.markdown(f"### 📗 {doc2['title']}")
+                st.markdown(f"**Authors:** {doc2['authors']}")
+                st.markdown(f"**Year:** {doc2['year']}  \n**Cluster:** `{doc2['cluster']}`")
+                st.markdown("**Abstract:**")
+                st.write(doc2["abstract"])
+
+            # Keyword Explanation Section
+            def extract_keywords(text, top_n=10):
+                stop_words = set(stopwords.words('english'))
+                words = word_tokenize(text.lower())
+                words = [re.sub(r'\W+', '', w) for w in words if w not in stop_words and len(w) > 2]
+                freq = Counter(words)
+                return [word for word, _ in freq.most_common(top_n)]
+
+            kw1 = set(extract_keywords(doc1["abstract"]))
+            kw2 = set(extract_keywords(doc2["abstract"]))
+
+            shared_kw = sorted(kw1 & kw2)
+            unique_kw1 = sorted(kw1 - kw2)
+            unique_kw2 = sorted(kw2 - kw1)
+
+            st.markdown("### 🧠 Explanation: Why Are They Similar/Different?")
+            st.markdown("**Shared Keywords:**")
+            st.write(", ".join(shared_kw) if shared_kw else "*None*")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Unique to Document 1:**")
+                st.write(", ".join(unique_kw1) if unique_kw1 else "*None*")
+            with col2:
+                st.markdown("**Unique to Document 2:**")
+                st.write(", ".join(unique_kw2) if unique_kw2 else "*None*")
 
     st.subheader("Cluster Details")
     with st.expander("View Documents in Each Cluster"):

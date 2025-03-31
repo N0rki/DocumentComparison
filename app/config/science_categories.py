@@ -1,5 +1,4 @@
 PREDEFINED_CATEGORIES = [
-    # Core Sciences
     "Physics",
     "Chemistry",
     "Biology",
@@ -176,7 +175,6 @@ PREDEFINED_CATEGORIES = [
     "Climate Ethics",
     "Science Communication",
     "Science Education",
-    "Philosophy of Science",
     "Science Policy",
     "Innovation Studies",
     "Technology Management",
