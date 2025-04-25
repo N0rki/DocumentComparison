@@ -1,0 +1,250 @@
+2025-03-29 13:56:01,872 - INFO - Starting application...
+2025-03-29 13:56:02,269 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 13:56:03,348 - INFO - SPECTER model loaded successfully
+2025-03-29 13:56:54,552 - INFO - Starting application...
+2025-03-29 13:56:56,778 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 13:56:59,317 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 13:56:59,318 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 13:57:02,153 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 13:57:02,165 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 13:57:02,213 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 13:57:02,242 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 13:57:03,576 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 13:57:06,354 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 13:57:07,936 - INFO - SPECTER model loaded successfully
+2025-03-29 14:14:16,652 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:14:19,348 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 14:14:19,379 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:14:21,984 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 14:14:22,063 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 14:14:22,246 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 14:14:22,310 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 14:14:23,543 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 14:16:13,091 - INFO - Starting application...
+2025-03-29 14:16:14,474 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:16:16,970 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 14:16:16,970 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:16:19,456 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 14:16:19,460 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 14:16:19,467 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 14:16:19,473 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 14:16:20,507 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 14:16:47,755 - INFO - Starting application...
+2025-03-29 14:16:48,183 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:16:50,760 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 14:16:50,762 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:16:53,709 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 14:16:53,713 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 14:16:53,720 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 14:16:53,726 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 14:16:54,756 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 14:16:56,295 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 14:16:57,723 - INFO - SPECTER model loaded successfully
+2025-03-29 14:24:27,523 - INFO - Starting application...
+2025-03-29 14:24:27,974 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:24:30,661 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 14:24:30,693 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:24:33,328 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 14:24:33,420 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 14:24:33,700 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 14:24:33,777 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 14:24:34,926 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 14:26:11,029 - INFO - Starting application...
+2025-03-29 14:26:11,228 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:26:13,809 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 14:26:13,810 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 14:26:16,298 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 14:26:16,302 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 14:26:16,309 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 14:26:16,315 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 14:26:17,375 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 15:44:35,258 - INFO - Starting application...
+2025-03-29 15:44:37,514 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 15:44:40,051 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 15:44:40,052 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 15:44:42,557 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 15:44:42,562 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 15:44:42,569 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 15:44:42,575 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 15:44:45,353 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 15:44:50,905 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 15:44:52,513 - INFO - SPECTER model loaded successfully
+2025-03-29 15:53:13,717 - INFO - Starting application...
+2025-03-29 15:53:15,469 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 15:53:17,977 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 15:53:17,979 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 15:53:20,553 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 15:53:20,563 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 15:53:20,589 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 15:53:20,634 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/count "HTTP/1.1 200 OK"
+2025-03-29 15:53:23,623 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/f2aefd26-2aee-432b-a5f1-4512284709e9/get "HTTP/1.1 200 OK"
+2025-03-29 15:53:43,707 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 15:53:45,301 - INFO - SPECTER model loaded successfully
+2025-03-29 16:18:39,221 - INFO - Starting application...
+2025-03-29 16:18:41,087 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:18:43,678 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 16:18:43,678 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:18:46,163 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 16:18:46,166 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 16:18:46,201 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 16:18:46,215 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 16:18:46,223 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 16:54:57,311 - INFO - Starting application...
+2025-03-29 16:54:59,123 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:55:01,674 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 16:55:01,674 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:55:04,183 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 16:55:04,185 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 16:55:04,193 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 16:55:04,199 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 16:55:06,013 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 16:55:21,635 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 16:55:23,255 - INFO - SPECTER model loaded successfully
+2025-03-29 16:56:08,307 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:56:08,759 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:56:10,934 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 16:56:10,942 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:56:11,415 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 16:56:11,422 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 16:56:13,466 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,481 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,504 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,525 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,932 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,953 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 16:56:13,996 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 16:56:14,013 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 16:56:16,005 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 18:50:38,413 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 18:50:41,424 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 18:50:41,471 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 18:50:44,406 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 18:50:44,592 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 18:50:45,136 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 18:50:45,229 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 18:50:47,780 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 19:09:58,767 - INFO - Starting application...
+2025-03-29 19:10:01,160 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:10:03,742 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:10:03,742 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:10:06,273 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:10:06,279 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:10:06,291 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:10:06,301 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 19:10:10,441 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 19:10:27,047 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 19:10:28,427 - INFO - SPECTER model loaded successfully
+2025-03-29 19:15:32,102 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:15:34,687 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:15:34,691 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:15:36,671 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:15:37,196 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:15:37,208 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:15:37,239 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:15:37,250 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 19:15:39,261 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:15:39,265 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:15:41,792 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:15:41,804 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:15:41,829 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:15:41,843 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 19:15:44,164 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 19:16:12,440 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:16:12,887 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:16:15,090 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:16:15,091 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:16:15,515 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:16:15,520 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:16:17,835 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:16:17,849 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:16:17,883 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:16:17,892 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 19:16:18,098 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:16:18,106 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:16:18,121 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:16:18,132 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/count "HTTP/1.1 200 OK"
+2025-03-29 19:16:20,233 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/5066a0ee-256c-4387-a631-29ed60356800/get "HTTP/1.1 200 OK"
+2025-03-29 19:39:58,254 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:40:00,787 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:40:00,788 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:40:03,277 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:40:03,282 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:40:03,301 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:40:03,307 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:40:03,702 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-29 19:42:39,572 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:42:40,312 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:42:42,376 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:42:42,438 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:42:43,152 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:42:43,203 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:42:45,186 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:42:45,341 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:42:45,652 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:42:45,788 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:42:46,390 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:42:46,483 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:42:46,746 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:42:46,856 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:42:47,612 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-29 19:44:39,981 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:44:42,834 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:44:42,896 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:44:45,864 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:44:46,040 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:44:46,442 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:44:46,552 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:44:47,268 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-29 19:46:20,838 - INFO - Starting application...
+2025-03-29 19:46:22,439 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:46:24,938 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:46:24,942 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:46:27,449 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:46:27,452 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:46:27,458 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:46:27,463 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:46:27,851 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-29 19:46:31,349 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-29 19:46:32,756 - INFO - SPECTER model loaded successfully
+2025-03-29 19:56:24,304 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:56:26,786 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:56:26,787 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:56:29,304 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:56:29,308 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:56:29,316 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:56:29,322 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:56:29,736 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-29 19:59:12,093 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:59:14,645 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-29 19:59:14,645 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-29 19:59:17,114 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-29 19:59:17,118 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-29 19:59:17,130 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-29 19:59:17,138 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/count "HTTP/1.1 200 OK"
+2025-03-29 19:59:17,509 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/e38946a7-1534-4ef7-9091-dab0c9f8e194/get "HTTP/1.1 200 OK"
+2025-03-30 01:32:58,417 - INFO - Starting application...
+2025-03-30 01:32:58,446 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:01,146 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-30 01:33:01,154 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:04,132 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-30 01:33:04,141 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-30 01:33:04,160 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-30 01:33:04,171 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/645c17e2-5c4c-415a-9290-7334ac337ed8/count "HTTP/1.1 200 OK"
+2025-03-30 01:33:04,245 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/645c17e2-5c4c-415a-9290-7334ac337ed8/get "HTTP/1.1 200 OK"
+2025-03-30 01:33:05,185 - INFO - Loading SPECTER model and tokenizer on cpu...
+2025-03-30 01:33:06,218 - INFO - SPECTER model loaded successfully
+2025-03-30 01:33:45,529 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:46,308 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:48,023 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-30 01:33:48,024 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:48,803 - INFO - HTTP Request: GET http://localhost:8000/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-03-30 01:33:48,803 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-03-30 01:33:50,489 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-30 01:33:50,492 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-30 01:33:50,501 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-30 01:33:50,507 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/645c17e2-5c4c-415a-9290-7334ac337ed8/count "HTTP/1.1 200 OK"
+2025-03-30 01:33:51,270 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-03-30 01:33:51,274 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-03-30 01:33:51,283 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-03-30 01:33:51,288 - INFO - HTTP Request: GET http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/645c17e2-5c4c-415a-9290-7334ac337ed8/count "HTTP/1.1 200 OK"
+2025-03-30 01:33:51,338 - INFO - HTTP Request: POST http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database/collections/645c17e2-5c4c-415a-9290-7334ac337ed8/get "HTTP/1.1 200 OK"

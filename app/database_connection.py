@@ -1,5 +1,7 @@
 import chromadb
+import os
 from chromadb.config import Settings
+
 
 def connect_to_chromadb(host="localhost", port=8000):
     """
@@ -26,8 +28,9 @@ def connect_to_chromadb(host="localhost", port=8000):
         )
         print("Successfully connected to ChromaDB API")
 
-        print("Creating/loading collection 'research_documents'...")
-        collection = chroma_client.get_or_create_collection(name="research_documents")
+        print("Creating/loading collection 'showcase_100'...")
+        collection_name = os.getenv("CHROMA_COLLECTION", "showcase_100")
+        collection = chroma_client.get_collection(name=collection_name)
         print(f"Collection ready. Current count: {collection.count()}")
 
         return chroma_client, collection

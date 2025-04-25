@@ -5,7 +5,15 @@ import numpy as np
 import json
 import requests
 import feedparser
+from ast import literal_eval
 import torch
+import random
+import matplotlib.pyplot as plt
+import io
+import zipfile
+import json
+import shap
+from collections import defaultdict
 import torch.nn as nn
 import networkx as nx
 from lstm.model_lstm import LinkPredictorLSTM
@@ -26,6 +34,7 @@ from vectorization import vectorize_text_specter
 import matplotlib.colors as mcolors
 import networkx as nx
 from nltk.corpus import wordnet
+from transformers import pipeline
 from pyvis.network import Network
 from spellchecker import SpellChecker
 import re
@@ -39,6 +48,11 @@ import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import Counter
+from similarity_utils import compute_mv_similarity
+from timeline_drift_utils import load_group_drift, add_group_drift_to_timeline, compute_group_drift
+from utils.dim_keyword_mapper import compute_dim_keywords_from_abstracts
+from semantic_explainer import generate_local_semantic_explanation
+
 
 class DataLoader:
     @staticmethod
@@ -101,6 +115,7 @@ class DataLoader:
             st.write("Full traceback:", traceback.format_exc())
             return pd.DataFrame()
 
+
 class DimensionalityReducer:
     @staticmethod
     def reduce_embeddings(embeddings, method, n_components):
@@ -113,6 +128,7 @@ class DimensionalityReducer:
         else:
             raise ValueError("Unsupported dimensionality reduction method")
         return reducer.fit_transform(embeddings)
+
 
 class Clusterer:
     @staticmethod
@@ -150,7 +166,7 @@ class Clusterer:
             unique_clusters = unique_clusters[unique_clusters != -1]
 
         category_embeddings = {category: vectorize_text_specter(category)
-                              for category in predefined_categories}
+                               for category in predefined_categories}
 
         for cluster_id in unique_clusters:
             cluster_mask = cluster_labels == cluster_id
@@ -174,6 +190,7 @@ class Clusterer:
             cluster_to_category[cluster_id] = best_category if max_similarity > 0.3 else f"Cluster {cluster_id}"
 
         return cluster_to_category
+
 
 class Visualizer:
     @staticmethod
@@ -205,8 +222,11 @@ class Visualizer:
             "Forest": "#1a472a"
         }
 
+
     @staticmethod
-    def create_network_graph(df, similarity_threshold=0.7, custom_colors=None):
+    def create_network_graph(df, similarity_threshold=0.7, custom_colors=None, similarity_mode="cosine",
+                             emb_weight=0.60, author_weight=0.15, cluster_weight=0.10, year_weight=0.10,
+                             keyword_weight=0.05):
         G = nx.Graph()
 
         for idx, row in df.iterrows():
@@ -225,31 +245,116 @@ class Visualizer:
             )
 
         embeddings = np.array(df["embedding"].tolist())
+        titles = df["title"].tolist()
+        authors = df["authors"].tolist()
+        clusters = df["cluster"].tolist()
+        years = df["year"].tolist()
+        abstracts = df["abstract"].tolist()
+
+        def hybrid_similarity(i, j, emb_weight=0.60, author_weight=0.15, cluster_weight=0.10, year_weight=0.10,
+                              keyword_weight=0.05):
+            cosine_sim = cosine_similarity(embeddings[i].reshape(1, -1), embeddings[j].reshape(1, -1))[0][0]
+            shared_authors = int(authors[i].strip().lower() == authors[j].strip().lower())
+            cluster_match = int(clusters[i] == clusters[j])
+            year_proximity = max(0, 1 - abs(years[i] - years[j]) / 10)
+            keywords_i = set(abstracts[i].lower().split())
+            keywords_j = set(abstracts[j].lower().split())
+            keyword_overlap = len(keywords_i & keywords_j) / max(len(keywords_i | keywords_j), 1)
+
+            return (
+                    emb_weight * cosine_sim +
+                    author_weight * shared_authors +
+                    cluster_weight * cluster_match +
+                    year_weight * year_proximity +
+                    keyword_weight * keyword_overlap
+            )
+
+        def create_hybrid_similarity_graph(df, emb_weight, author_weight, cluster_weight, year_weight, keyword_weight,
+                                           threshold=0.75):
+            from networkx import Graph
+            from sklearn.metrics.pairwise import cosine_similarity
+            import numpy as np
+
+            G = Graph()
+            embeddings = list(df['embedding'])
+            abstracts = list(df['abstract'])
+            authors = list(df['authors'].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x)))
+            clusters = list(df['cluster'] if 'cluster' in df.columns else [None] * len(df))
+            years = list(df['year'])
+
+            for i in range(len(df)):
+                for j in range(i + 1, len(df)):
+                    score = hybrid_similarity(
+                        i, j,
+                        emb_weight, author_weight,
+                        cluster_weight, year_weight,
+                        keyword_weight
+                    )
+                    if score >= threshold:
+                        G.add_edge(
+                            df.iloc[i]["title"],
+                            df.iloc[j]["title"],
+                            weight=float(score),
+                            title=f"Similarity: {score:.2f}"
+                        )
+            return G
+
+        def compute_cs2_similarity(doc_idx, embeddings, num_negatives=10):
+            emb1 = np.array(embeddings[doc_idx]).reshape(1, -1)
+            all_indices = list(range(len(embeddings)))
+            all_indices.remove(doc_idx)
+            negative_indices = random.sample(all_indices, min(num_negatives, len(all_indices)))
+            negative_sims = [cosine_similarity(emb1, np.array(embeddings[i]).reshape(1, -1))[0][0] for i in
+                             negative_indices]
+            mean_neg_sim = np.mean(negative_sims)
+
+            cs2_scores = []
+            for j in range(len(embeddings)):
+                if j == doc_idx:
+                    cs2_scores.append(0)
+                else:
+                    sim = cosine_similarity(emb1, np.array(embeddings[j]).reshape(1, -1))[0][0]
+                    cs2_scores.append(float(sim - mean_neg_sim))
+            return cs2_scores
+
+        cs2_matrix = None
+        if similarity_mode == "cs2sim":
+            cs2_matrix = [compute_cs2_similarity(i, embeddings) for i in range(len(embeddings))]
+
+            flat_vals = [score for row in cs2_matrix for score in row]
+            min_val, max_val = min(flat_vals), max(flat_vals)
+            if max_val != min_val:
+                cs2_matrix = [[(s - min_val) / (max_val - min_val) for s in row] for row in cs2_matrix]
+
+        edge_count = 0
         for i in range(len(embeddings)):
             for j in range(i + 1, len(embeddings)):
-                similarity = cosine_similarity(
-                    embeddings[i].reshape(1, -1),
-                    embeddings[j].reshape(1, -1)
-                )[0][0]
+                if similarity_mode == "hybrid":
+                    similarity = hybrid_similarity(i, j)
+                elif similarity_mode == "cs2sim":
+                    similarity = cs2_matrix[i][j] if cs2_matrix else 0
+                elif similarity_mode == "mvfusion":
+                    sim = compute_mv_similarity(df.iloc[i], df.iloc[j])
+                    similarity = max(0.0, min(1.0, sim))
+                else:
+                    similarity = cosine_similarity(
+                        embeddings[i].reshape(1, -1),
+                        embeddings[j].reshape(1, -1)
+                    )[0][0]
+
                 if similarity > similarity_threshold:
                     G.add_edge(i, j, weight=float(similarity))
+                    edge_count += 1
 
         net = Network(height="600px", width="100%", notebook=False, directed=False)
+
         net.from_nx(G)
 
-        options = {
-            "physics": {
-                "barnesHut": {
-                    "avoidOverlap": 0.02
-                },
-                "minVelocity": 0.75
-            }
-        }
-
-        options_str = json.dumps(options)
-        net.set_options(options_str)
-        net.save_graph("network.html")
-        return net
+        net.set_options(json.dumps({
+            "physics": {"barnesHut": {"avoidOverlap": 0.02}, "minVelocity": 0.75}
+        }))
+        net.note = f"Total edges: {edge_count} | Similarity method: {similarity_mode}"
+        return net, G
 
     @staticmethod
     def create_heatmap(df, similarity_threshold=0.7):
@@ -257,7 +362,7 @@ class Visualizer:
         similarity_matrix = cosine_similarity(embeddings)
         similarity_matrix[similarity_matrix < similarity_threshold] = 0
 
-        truncated_titles = [title[:50] + "..." if len(title) > 50 else title for title in df["title"].tolist()]
+        truncated_titles = [title[:40] + "..." if len(title) > 40 else title for title in df["title"].tolist()]
 
         fig = go.Figure(data=go.Heatmap(
             z=similarity_matrix,
@@ -288,17 +393,48 @@ class Visualizer:
             st.warning("Please perform dimensionality reduction first.")
             return None
 
-        cluster_mapping = {cluster: i for i, cluster in enumerate(df["cluster"].unique())}
-        df["cluster_numeric"] = df["cluster"].map(cluster_mapping)
+        df = df.copy()
 
-        fig = px.parallel_coordinates(
-            df,
-            dimensions=["x", "y", "cluster_numeric"],
-            color="cluster_numeric",
-            labels={"x": "X", "y": "Y", "cluster_numeric": "Cluster"},
-            color_continuous_scale=color_scheme,
+        unique_clusters = df["cluster"].unique()
+        cluster_name_to_id = {name: i for i, name in enumerate(unique_clusters)}
+        cluster_id_to_name = {i: name for name, i in cluster_name_to_id.items()}
+        df["cluster_numeric"] = df["cluster"].map(cluster_name_to_id)
+
+        df["title_index"] = range(len(df))
+        title_index_to_title = dict(zip(df["title_index"], df["title"]))
+
+        fig = go.Figure(data=go.Parcoords(
+            line=dict(
+                color=df["cluster_numeric"],
+                colorscale=color_scheme,
+                showscale=True,
+                cmin=df["cluster_numeric"].min(),
+                cmax=df["cluster_numeric"].max()
+            ),
+            dimensions=[
+                dict(
+                    label="Title",
+                    values=df["title_index"],
+                    tickvals=df["title_index"].tolist(),
+                    ticktext=[t[:50] for t in df["title"].tolist()],
+                    range=[df["title_index"].min(), df["title_index"].max()]
+                ),
+                dict(label="X", values=df["x"]),
+                dict(label="Y", values=df["y"]),
+                dict(
+                    label="Cluster",
+                    values=df["cluster_numeric"],
+                    tickvals=list(cluster_id_to_name.keys()),
+                    ticktext=list(cluster_id_to_name.values())
+                )
+            ]
+        ))
+
+        fig.update_layout(
+            title="Parallel Coordinates: Document Titles → Cluster Path",
+            margin=dict(l=300, r=50, t=50, b=50)
         )
-        fig.update_layout(title="Parallel Coordinates Plot")
+
         return fig
 
     @staticmethod
@@ -325,6 +461,7 @@ class Visualizer:
             font=dict(size=12),
         )
         return fig
+
 
 class ExternalAPIs:
     @staticmethod
@@ -417,6 +554,7 @@ class ExternalAPIs:
             st.error(f"Failed to fetch citation count: {str(e)}")
             return 0
 
+
 class SemanticSearch:
     @staticmethod
     def semantic_search(df, query, top_k=5, similarity_threshold=0.5):
@@ -445,6 +583,7 @@ class SemanticSearch:
 
         return df_sorted.head(top_k)
 
+
 @st.cache_resource
 def load_link_model(model_path="lstm/link_predictor_lstm.pt"):
     model = LinkPredictorLSTM()
@@ -452,6 +591,50 @@ def load_link_model(model_path="lstm/link_predictor_lstm.pt"):
     model.load_state_dict(torch.load(abs_path, map_location="cpu"))
     model.eval()
     return model
+
+@st.cache_data
+def load_sdaf_data():
+    with open("../group_embeddings/centrality_by_year.json", "r", encoding="utf-8") as f:
+        historical = json.load(f)
+    with open("../sdaf_forecasts/multi_year_forecasts.json", "r", encoding="utf-8") as f:
+        forecasts = json.load(f)
+    return historical, forecasts
+
+def average_historical(historical):
+    grouped = defaultdict(dict)
+    for year, topics in historical.items():
+        for topic, vals in topics.items():
+            grouped[topic][int(year)] = float(np.mean(vals))
+    return grouped
+
+def plot_sdaf_curve(topic, hist_data, forecast_data):
+    hist_years = sorted(hist_data[topic].keys())
+    hist_vals = [hist_data[topic][y] for y in hist_years]
+
+    forecast_years = sorted(map(int, forecast_data[topic].keys()))
+    forecast_vals = [forecast_data[topic][str(y)] for y in forecast_years]
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(hist_years, hist_vals, marker='o', label='Historical', color='C0')
+    plt.plot(forecast_years, forecast_vals, marker='x', linestyle='--', label='Forecast', color='C1')
+    plt.title(f"SDAF: {topic}")
+    plt.xlabel("Year")
+    plt.ylabel("Centrality")
+    plt.legend()
+    st.pyplot(plt.gcf())
+    plt.close()
+
+def show_sdaf_section():
+    st.markdown("## Semantic Drift-Aware Forecasting (SDAF)")
+
+    historical_raw, forecast_raw = load_sdaf_data()
+    hist_data = average_historical(historical_raw)
+
+    common_topics = sorted(set(hist_data) & set(forecast_raw))
+    selected = st.selectbox("Select a topic:", common_topics)
+
+    if selected:
+        plot_sdaf_curve(selected, hist_data, forecast_raw)
 
 def predict_link_score(emb1, emb2, model):
     diff = np.abs(emb1 - emb2)
@@ -461,21 +644,66 @@ def predict_link_score(emb1, emb2, model):
         score = model(x_tensor).item()
     return score
 
-def build_dynamic_graph(filtered_df, model, threshold=0.8):
+
+def build_dynamic_graph(df, model, threshold=0.8):
     G = nx.Graph()
-    for i, row in filtered_df.iterrows():
+    for i, row in df.iterrows():
         G.add_node(row["title"], metadata=row)
 
-    embeddings = filtered_df["embedding"].tolist()
-    titles = filtered_df["title"].tolist()
+    embeddings = df["embedding"].tolist()
+    titles = df["title"].tolist()
 
     for i in range(len(embeddings)):
-        for j in range(i+1, len(embeddings)):
+        for j in range(i + 1, len(embeddings)):
             score = predict_link_score(np.array(embeddings[i]), np.array(embeddings[j]), model)
             if score >= threshold:
                 G.add_edge(titles[i], titles[j], weight=score)
 
     return G
+
+
+def extract_keywords(text, top_n=5):
+    words = re.findall(r'\b\w+\b', text.lower())
+    stopwords = set(['the', 'and', 'for', 'with', 'that', 'from', 'this', 'using', 'are', 'such', 'their', 'have'])
+    words = [w for w in words if w not in stopwords and len(w) > 3]
+    freq = defaultdict(int)
+    for word in words:
+        freq[word] += 1
+    return sorted(freq, key=freq.get, reverse=True)[:top_n]
+
+
+def build_knowledge_graph(df, use_lstm_links=True, threshold=0.8, model=None):
+    G = nx.MultiDiGraph()
+
+    for _, row in df.iterrows():
+        doc_id = row["title"]
+        G.add_node(doc_id, type="document", metadata=row)
+
+        authors = [a.strip() for a in row["authors"].split(",")]
+        for author in authors:
+            G.add_node(author, type="author")
+            G.add_edge(doc_id, author, relation="authored_by")
+
+        cluster = row["cluster"]
+        G.add_node(cluster, type="cluster")
+        G.add_edge(doc_id, cluster, relation="in_cluster")
+
+        keywords = extract_keywords(row["abstract"])
+        for kw in keywords:
+            G.add_node(kw, type="keyword")
+            G.add_edge(doc_id, kw, relation="mentions")
+
+    if use_lstm_links and model:
+        embeddings = df["embedding"].tolist()
+        titles = df["title"].tolist()
+        for i in range(len(embeddings)):
+            for j in range(i + 1, len(embeddings)):
+                score = predict_link_score(np.array(embeddings[i]), np.array(embeddings[j]), model)
+                if score >= threshold:
+                    G.add_edge(titles[i], titles[j], relation="similar_to", weight=score)
+
+    return G
+
 
 def preprocess_query(query):
     spell = SpellChecker()
@@ -484,6 +712,90 @@ def preprocess_query(query):
     corrected_query = re.sub(r"[^a-zA-Z0-9\s]", "", corrected_query)
 
     return corrected_query
+
+class GRUForecast(nn.Module):
+    def __init__(self, input_size=1, hidden_size=16, num_layers=1):
+        super().__init__()
+        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, 1)
+
+    def forward(self, x):
+        out, _ = self.gru(x)
+        return self.fc(out[:, -1, :])
+
+def compute_yearly_centrality(docs, cluster_label):
+    yearly_embeddings = defaultdict(list)
+    for doc in docs:
+        if doc.get("cluster") == cluster_label and "specter_embedding" in doc and "year" in doc:
+            yearly_embeddings[int(doc["year"])].append(np.array(doc["specter_embedding"]))
+
+    centrality_by_year = {}
+    for year, embeds in yearly_embeddings.items():
+        if len(embeds) < 2:
+            continue
+        embeds = np.stack(embeds)
+        centroid = np.mean(embeds, axis=0, keepdims=True)
+        sims = cosine_similarity(embeds, centroid)
+        centrality_by_year[year] = float(np.mean(sims))
+
+    return dict(sorted(centrality_by_year.items()))
+
+def forecast_centrality(time_series, forecast_horizon=3):
+    values = np.array(list(time_series.values()), dtype=np.float32)
+    if len(values) < 4:
+        return None
+
+    min_val, max_val = np.min(values), np.max(values)
+    norm = (values - min_val) / (max_val - min_val + 1e-8)
+    X = torch.tensor([norm[-3:]], dtype=torch.float32).unsqueeze(-1)
+
+    model = GRUForecast()
+    model.eval()
+
+    preds = []
+    current = X.clone()
+    for _ in range(forecast_horizon):
+        with torch.no_grad():
+            next_val = model(current)
+        preds.append(next_val.item())
+        current = torch.cat((current[:, 1:, :], next_val.view(1, 1, 1)), dim=1)
+
+    preds = np.array(preds) * (max_val - min_val + 1e-8) + min_val
+    return preds.tolist()
+
+def show_dynamic_sdaf_section(docs):
+    st.markdown("## Semantic Drift-Aware Forecasting (SDAF)")
+
+    clusters = sorted(set(doc.get("cluster") for doc in docs if "cluster" in doc))
+    if not clusters:
+        st.warning("No clusters found in current selection.")
+        return
+
+    selected_cluster = st.selectbox("Select a cluster:", clusters)
+    if not selected_cluster:
+        return
+
+    yearly_centrality = compute_yearly_centrality(docs, selected_cluster)
+    forecast = forecast_centrality(yearly_centrality)
+
+    if not forecast:
+        st.warning("Not enough historical data to forecast.")
+        return
+
+    years = list(yearly_centrality.keys())
+    values = list(yearly_centrality.values())
+    forecast_years = list(range(years[-1] + 1, years[-1] + 1 + len(forecast)))
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(years, values, marker='o', label='Historical', color='blue')
+    plt.plot(forecast_years, forecast, marker='x', linestyle='--', label='Forecast', color='orange')
+    plt.xlabel("Year")
+    plt.ylabel("Centrality")
+    plt.title(f"SDAF Forecast for Cluster: {selected_cluster}")
+    plt.legend()
+    st.pyplot(plt.gcf())
+    plt.close()
+
 
 def get_most_likely_field(query):
     field_descriptions = {
@@ -522,18 +834,37 @@ def get_most_likely_field(query):
 
     return most_likely_field
 
+def load_tlg_scores(path="tlg_scores.json"):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        tlg_map = {}
+        for entry in data:
+            key = tuple(sorted([entry["doc1"], entry["doc2"]]))
+            tlg_map[key] = entry["tlg"]
+        return tlg_map
+    except Exception as e:
+        print("⚠Could not load TLG scores:", e)
+        return {}
+
 def calculate_inertia(embeddings, max_clusters=10):
     inertia_values = []
+    n_samples = len(embeddings)
+
     for n_clusters in range(1, max_clusters + 1):
+        if n_clusters > n_samples:
+            break
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         kmeans.fit(embeddings)
         inertia_values.append(kmeans.inertia_)
+
     return inertia_values
 
-def compare_documents(embeddings_dict, abstracts_dict, cluster_labels):
-    st.markdown("### 🔍 Compare Two Documents")
 
-    with st.expander("📄 Document Comparison Tool (Side-by-Side)", expanded=False):
+def compare_documents(embeddings_dict, abstracts_dict, cluster_labels):
+    st.markdown("### Compare Two Documents")
+
+    with st.expander("Document Comparison Tool (Side-by-Side)", expanded=False):
         doc_ids = list(abstracts_dict.keys())
         if len(doc_ids) < 2:
             st.warning("Need at least 2 documents to compare.")
@@ -548,7 +879,7 @@ def compare_documents(embeddings_dict, abstracts_dict, cluster_labels):
 
         if doc_a and doc_b:
             # Abstracts
-            st.markdown("#### 📘 Abstracts")
+            st.markdown("#### Abstracts")
             col1, col2 = st.columns(2)
             col1.markdown(f"**{doc_a}**")
             col1.info(abstracts_dict.get(doc_a, "No abstract available."))
@@ -559,31 +890,36 @@ def compare_documents(embeddings_dict, abstracts_dict, cluster_labels):
             vec_a = embeddings_dict[doc_a].reshape(1, -1)
             vec_b = embeddings_dict[doc_b].reshape(1, -1)
             sim = cosine_similarity(vec_a, vec_b)[0][0]
-            st.markdown(f"**🧠 Cosine Similarity:** `{sim:.4f}`")
+            st.markdown(f"**Cosine Similarity:** `{sim:.4f}`")
 
-            # Cluster Match
             cluster_a = cluster_labels.get(doc_a, "N/A")
             cluster_b = cluster_labels.get(doc_b, "N/A")
             same_cluster = cluster_a == cluster_b
-            st.markdown(f"**🧩 Same Cluster:** {'✅ Yes' if same_cluster else '❌ No'} (A: {cluster_a}, B: {cluster_b})")
+            st.markdown(f"**Same Cluster:** {'✅ Yes' if same_cluster else '❌ No'} (A: {cluster_a}, B: {cluster_b})")
 
-            # Shared Keywords (basic TF-IDF)
             vect = TfidfVectorizer(stop_words='english', max_features=100)
             vect.fit([abstracts_dict[doc_a], abstracts_dict[doc_b]])
             keywords_a = set(vect.build_analyzer()(abstracts_dict[doc_a]))
             keywords_b = set(vect.build_analyzer()(abstracts_dict[doc_b]))
             shared_keywords = keywords_a & keywords_b
-            st.markdown("**🔁 Shared Keywords:**")
+            st.markdown("**Shared Keywords:**")
             st.write(", ".join(shared_keywords) if shared_keywords else "None found")
+
 
 def calculate_silhouette_scores(embeddings, max_clusters=10):
     silhouette_scores = []
+    n_samples = len(embeddings)
+
     for n_clusters in range(2, max_clusters + 1):
+        if n_clusters >= n_samples:
+            break
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         cluster_labels = kmeans.fit_predict(embeddings)
         silhouette_avg = silhouette_score(embeddings, cluster_labels)
         silhouette_scores.append(silhouette_avg)
+
     return silhouette_scores
+
 
 def extract_text_from_pdf(pdf_path):
     reader = PdfReader(pdf_path)
@@ -591,6 +927,58 @@ def extract_text_from_pdf(pdf_path):
     for page in reader.pages:
         text += page.extract_text()
     return text
+
+
+GENERIC_TERMS = {"distributed", "data", "approach", "problem", "text", "paper", "model"}
+
+def generate_natural_explanation(feature_importances, feature_names, doc1, doc2, top_k=5):
+    """
+    Create a natural language explanation for influence prediction between two documents.
+    Filters generic tokens and skips blank authors.
+    """
+    importance_pairs = list(zip(feature_names, feature_importances))
+    sorted_pairs = sorted(importance_pairs, key=lambda x: abs(x[1]), reverse=True)
+
+    doc1_words, doc2_words, diff_words = [], [], []
+
+    for name, score in sorted_pairs:
+        if len(doc1_words + doc2_words + diff_words) >= top_k:
+            break
+        keyword = name.split(": ")[1].strip().lower()
+        if keyword in GENERIC_TERMS:
+            continue
+        if "doc1" in name:
+            doc1_words.append(keyword)
+        elif "doc2" in name:
+            doc2_words.append(keyword)
+        elif "diff" in name:
+            diff_words.append(keyword)
+
+    explanation = "This document is predicted to influence the other because they both relate to "
+    shared_terms = set(doc1_words) & set(doc2_words)
+
+    if shared_terms:
+        explanation += ", ".join(shared_terms)
+    elif diff_words:
+        explanation += ", ".join(diff_words)
+    elif doc1_words or doc2_words:
+        explanation += ", ".join(doc1_words + doc2_words)
+    else:
+        explanation += "several overlapping concepts"
+
+    authors_1 = {a.strip().lower() for a in doc1.get("authors", []) if a.strip()}
+    authors_2 = {a.strip().lower() for a in doc2.get("authors", []) if a.strip()}
+    common_authors = authors_1 & authors_2
+
+    if common_authors:
+        readable_authors = [a.title() for a in sorted(common_authors)]
+        explanation += f" and share common authors such as {', '.join(readable_authors[:2])}"
+
+    explanation += "."
+
+    return explanation
+
+
 
 def add_pdf_summarization():
     st.sidebar.subheader("PDF Summarization")
@@ -609,6 +997,9 @@ def add_pdf_summarization():
 
     max_length = st.sidebar.slider("Maximum Summary Length", 50, 200, 130)
     min_length = st.sidebar.slider("Minimum Summary Length", 10, 100, 30)
+
+    st.sidebar.markdown("### Timeline Overlay")
+    enable_drift = st.sidebar.checkbox("Show Group Drift Overlay", value=True)
 
     if st.sidebar.button("Summarize"):
         with st.spinner("Summarizing PDF... This may take a moment."):
@@ -636,6 +1027,279 @@ def add_pdf_summarization():
                 import traceback
                 st.error(traceback.format_exc())
 
+
+def export_knowledge_graph_svg(G):
+    pos = nx.spring_layout(G, seed=42)
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    node_colors = []
+    for _, data in G.nodes(data=True):
+        t = data.get("type")
+        node_colors.append({
+                               "document": "#8ecae6",
+                               "author": "#ffafcc",
+                               "keyword": "#ffd6a5",
+                               "cluster": "#caffbf"
+                           }.get(t, "#cccccc"))
+
+    nx.draw(
+        G, pos, ax=ax,
+        with_labels=False,
+        node_size=100,
+        node_color=node_colors,
+        edge_color="#999999",
+        width=0.5,
+        alpha=0.9
+    )
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format="svg", bbox_inches="tight")
+    buf.seek(0)
+    return buf
+
+
+def export_all_formats(G, zip_path="knowledge_graph_bundle.zip", namespace="http://example.org/"):
+    ttl, rdfxml, ntriples, json_data, cypher = [], [], [], {"nodes": [], "edges": []}, []
+
+    for node_id, data in G.nodes(data=True):
+        label = data.get("type", "Entity").capitalize()
+
+        json_data["nodes"].append({
+            "id": node_id,
+            "type": data.get("type", "Entity"),
+            "attributes": {k: str(v) for k, v in data.items() if k != "type"}
+        })
+
+        props = ", ".join([f'{k}: "{str(v).replace(chr(34), "")}"'
+                           for k, v in data.items() if isinstance(v, (str, int, float))])
+        cypher.append(f'CREATE (:`{label}` {{id: "{node_id}", {props}}});')
+
+    for u, v, data in G.edges(data=True):
+        pred = data.get("relation", "relatedTo")
+
+        ttl.append(f'<{namespace}{u}> <{namespace}{pred}> <{namespace}{v}> .\n')
+        ntriples.append(f'<{namespace}{u}> <{namespace}{pred}> <{namespace}{v}> .\n')
+        rdfxml.append(f'  <rdf:Description rdf:about="{namespace}{u}">\n'
+                      f'    <{pred} rdf:resource="{namespace}{v}" />\n'
+                      f'  </rdf:Description>\n')
+
+        json_data["edges"].append({
+            "source": u,
+            "target": v,
+            "relation": pred
+        })
+
+        cypher.append(f'MATCH (a {{id: "{u}"}}), (b {{id: "{v}"}})\nCREATE (a)-[:`{pred.upper()}`]->(b);')
+
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr("knowledge_graph.ttl", "".join(ttl))
+        zf.writestr("knowledge_graph.nt", "".join(ntriples))
+        zf.writestr("knowledge_graph.rdf",
+                    '<?xml version="1.0"?>\n<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+                    "".join(rdfxml) + '\n</rdf:RDF>'
+                    )
+        zf.writestr("knowledge_graph.json", json.dumps(json_data, indent=2))
+        zf.writestr("knowledge_graph.cypher", "\n".join(cypher))
+
+    return zip_path
+
+
+def export_document_clusters(df, zip_path="document_clusters.zip"):
+    cluster_json = df[["title", "authors", "year", "abstract", "cluster", "x", "y"]].to_dict(orient="records")
+    cluster_csv = df[["title", "authors", "year", "abstract", "cluster", "x", "y"]]
+
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr("clusters.csv", cluster_csv.to_csv(index=False))
+        zf.writestr("clusters.json", json.dumps(cluster_json, indent=2))
+
+    return zip_path
+
+
+def export_network_graph(df, similarity_threshold, zip_path="network_graph.zip"):
+    G = nx.Graph()
+    for idx, row in df.iterrows():
+        G.add_node(row["title"], cluster=row["cluster"], authors=row["authors"], year=row["year"])
+
+    embeddings = np.array(df["embedding"].tolist())
+    titles = df["title"].tolist()
+
+    for i in range(len(embeddings)):
+        for j in range(i + 1, len(embeddings)):
+            sim = cosine_similarity(embeddings[i].reshape(1, -1), embeddings[j].reshape(1, -1))[0][0]
+            if sim > similarity_threshold:
+                G.add_edge(titles[i], titles[j], similarity=sim)
+
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        nx.write_graphml(G, "temp.graphml")
+        nx.write_gexf(G, "temp.gexf")
+
+        graph_json = nx.node_link_data(G)
+        zf.writestr("network.json", json.dumps(graph_json, indent=2))
+
+        cypher_lines = []
+        for n, d in G.nodes(data=True):
+            props = ", ".join([f'{k}: "{str(v)}"' for k, v in d.items()])
+            cypher_lines.append(f'CREATE (:Document {{id: "{n}", {props}}});')
+        for u, v, d in G.edges(data=True):
+            cypher_lines.append(
+                f'MATCH (a {{id: "{u}"}}), (b {{id: "{v}"}}) CREATE (a)-[:SIMILAR_TO {{similarity: {d["similarity"]:.4f}}}]->(b);')
+        zf.writestr("network.cypher", "\n".join(cypher_lines))
+
+        zf.write("temp.graphml", "network.graphml")
+        zf.write("temp.gexf", "network.gexf")
+
+    os.remove("temp.graphml")
+    os.remove("temp.gexf")
+    return zip_path
+
+
+def get_feature_labels_from_dim_words(expanded_top_words: dict) -> list:
+    """
+    Constructs human-readable feature labels from dimension-to-keyword map.
+    Format: ['doc1: word', 'doc2: word', 'diff: word']
+
+    Args:
+        expanded_top_words (dict): Mapping from dim index to top word
+
+    Returns:
+        List[str]: Full list of 2304 labels
+    """
+    labels = []
+    for i in range(768):
+        word = expanded_top_words.get(i, f"dim{i}")
+        labels.append(f"doc1: {word}")
+    for i in range(768):
+        word = expanded_top_words.get(i, f"dim{i}")
+        labels.append(f"doc2: {word}")
+    for i in range(768):
+        word = expanded_top_words.get(i, f"dim{i}")
+        labels.append(f"diff: {word}")
+    return labels
+
+
+def compute_hybrid_similarity(doc1, doc2, embedding1, embedding2):
+    cosine_sim = cosine_similarity([embedding1], [embedding2])[0][0]
+
+    authors1 = set(a.strip().lower() for a in doc1["authors"].split(","))
+    authors2 = set(a.strip().lower() for a in doc2["authors"].split(","))
+    shared_authors = len(authors1 & authors2) / max(len(authors1 | authors2), 1)
+
+    cluster_match = 1 if doc1["cluster"] == doc2["cluster"] else 0
+
+    year1 = int(doc1.get("year", 2020))
+    year2 = int(doc2.get("year", 2020))
+    year_proximity = 1 - min(abs(year1 - year2), 10) / 10
+
+    keywords1 = set(extract_keywords(doc1["abstract"]))
+    keywords2 = set(extract_keywords(doc2["abstract"]))
+    keyword_overlap = len(keywords1 & keywords2) / max(len(keywords1 | keywords2), 1)
+
+    hybrid_score = (
+            0.60 * cosine_sim +
+            0.15 * shared_authors +
+            0.10 * cluster_match +
+            0.10 * year_proximity +
+            0.05 * keyword_overlap
+    )
+
+    return hybrid_score
+
+
+def prepare_lstm_features(doc1, doc2):
+    import numpy as np
+    emb1 = doc1["embedding"]
+    emb2 = doc2["embedding"]
+    diff = np.abs(emb1 - emb2)
+    return np.concatenate([emb1, emb2, diff])
+
+
+@st.cache_resource
+def load_custom_shap_explainer(_model, df, sample_size=20):
+    import numpy as np
+    import torch
+
+    pairs = []
+    embeddings = list(df['embedding'])[:sample_size]
+    for i in range(len(embeddings)):
+        for j in range(i + 1, len(embeddings)):
+            emb1, emb2 = embeddings[i], embeddings[j]
+            diff = np.abs(emb1 - emb2)
+            vec = np.concatenate([emb1, emb2, diff])
+            pairs.append(vec)
+            if len(pairs) >= sample_size:
+                break
+        if len(pairs) >= sample_size:
+            break
+
+    background = np.stack(pairs)
+
+    baseline_preds = []
+    for sample in background:
+        x_tensor = torch.tensor(sample.reshape(1, -1), dtype=torch.float32)
+        with torch.no_grad():
+            pred = _model(x_tensor).item()
+        baseline_preds.append(pred)
+
+    expected_value = np.mean(baseline_preds)
+
+    def explain_prediction(features):
+        n_features = len(features)
+        feature_importances = np.zeros(n_features)
+
+        x_tensor = torch.tensor(features.reshape(1, -1), dtype=torch.float32)
+        with torch.no_grad():
+            baseline_pred = _model(x_tensor).item()
+
+        for i in range(n_features):
+            perturbed = features.copy()
+            perturbed[i] = 0
+
+            x_tensor = torch.tensor(perturbed.reshape(1, -1), dtype=torch.float32)
+            with torch.no_grad():
+                new_pred = _model(x_tensor).item()
+
+            feature_importances[i] = baseline_pred - new_pred
+
+        return feature_importances, expected_value
+
+    return explain_prediction, expected_value
+
+def export_cosine_graph(df, similarity_threshold=0.7, path="graph_cosine.gexf"):
+    G = nx.Graph()
+    embeddings = list(df["embedding"])
+    titles = list(df["title"])
+
+    for i in range(len(embeddings)):
+        G.add_node(titles[i], title=titles[i])
+
+    for i in range(len(embeddings)):
+        for j in range(i + 1, len(embeddings)):
+            sim = cosine_similarity([embeddings[i]], [embeddings[j]])[0][0]
+            if sim >= similarity_threshold:
+                G.add_edge(titles[i], titles[j], weight=sim)
+
+    nx.write_gexf(G, path)
+    print(f"✅ Cosine similarity graph saved to {path}")
+
+def export_lstm_graph(df, model, threshold=0.8, path="graph_lstm.gexf"):
+    G = nx.Graph()
+    embeddings = list(df["embedding"])
+    titles = list(df["title"])
+
+    for i in range(len(embeddings)):
+        G.add_node(titles[i], title=titles[i])
+
+    for i in range(len(embeddings)):
+        for j in range(i + 1, len(embeddings)):
+            score = predict_link_score(np.array(embeddings[i]), np.array(embeddings[j]), model)
+            if score >= threshold:
+                G.add_edge(titles[i], titles[j], weight=score)
+
+    nx.write_gexf(G, path)
+    print(f"✅ LSTM prediction graph saved to {path}")
+
+
+
 def main():
     st.title("Interactive Document Dashboard")
     st.sidebar.header("Filters and Settings")
@@ -660,7 +1324,7 @@ def main():
     filtered_df = df[
         (df["year"] >= year_range[0]) &
         (df["year"] <= year_range[1])
-    ]
+        ]
 
     embeddings = np.array(filtered_df["embedding"].tolist())
 
@@ -744,6 +1408,107 @@ def main():
 
     filtered_df["cluster"] = [cluster_to_category[label] for label in cluster_labels]
 
+    docs_by_year = defaultdict(list)
+    for idx, row in filtered_df.iterrows():
+        docs_by_year[row["year"]].append({
+            "title": row["title"],
+            "year": row["year"],
+            "cluster": row["cluster"],
+            "embedding": row["embedding"]
+        })
+
+    centroids_by_year = defaultdict(dict)
+    for year, docs in docs_by_year.items():
+        clusters = defaultdict(list)
+        for doc in docs:
+            clusters[doc["cluster"]].append(doc["embedding"])
+        for cluster, emb_list in clusters.items():
+            centroids_by_year[year][cluster] = np.mean(np.array(emb_list), axis=0)
+
+    years_sorted = sorted(centroids_by_year.keys())
+    influence_scores = []
+    for idx, year in enumerate(years_sorted[:-1]):
+        current_year_docs = docs_by_year[year]
+        for doc in current_year_docs:
+            total_influence = 0
+            doc_emb = np.array(doc["embedding"]).reshape(1, -1)
+            for future_year in years_sorted[idx + 1:]:
+                future_centroids = centroids_by_year[future_year].values()
+                sims = cosine_similarity(doc_emb, np.array(list(future_centroids)))
+                max_sim = np.max(sims)
+                total_influence += max_sim
+
+            influence_scores.append({
+                "title": doc["title"],
+                "year": year,
+                "cluster": doc["cluster"],
+                "influence_score": float(total_influence)
+            })
+
+    influence_scores_sorted = sorted(influence_scores, key=lambda x: x["influence_score"], reverse=True)
+
+    os.makedirs("app", exist_ok=True)
+    with open("app/semantic_influence_scores.json", "w", encoding="utf-8") as f:
+        json.dump(influence_scores_sorted, f, indent=2, ensure_ascii=False)
+
+    print("✅ Semantic influence scores saved to app/semantic_influence_scores.json")
+
+    grouped_embeddings_by_year = defaultdict(lambda: defaultdict(list))
+
+    for _, row in filtered_df.iterrows():
+        year = int(row["year"])
+        group = row["cluster"]
+        embedding = row["embedding"]
+        grouped_embeddings_by_year[year][group].append(embedding.tolist())
+
+    os.makedirs("app/group_embeddings", exist_ok=True)
+    path = "app/group_embeddings/group_embeddings_by_year.json"
+
+    save_friendly = {str(y): {str(g): embs for g, embs in group_map.items()}
+                     for y, group_map in grouped_embeddings_by_year.items()}
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(save_friendly, f, indent=2, ensure_ascii=False)
+
+    from tlg.tlg_group import compute_group_drift
+
+    drift_data = compute_group_drift(save_friendly)
+    with open("app/group_embeddings/group_tlg_scores.json", "w", encoding="utf-8") as f:
+        json.dump(drift_data, f, indent=2)
+
+
+    drift_entries = []
+    sorted_years = sorted(save_friendly.keys())
+
+    for i in range(len(sorted_years) - 1):
+        y1, y2 = sorted_years[i], sorted_years[i + 1]
+        groups1 = save_friendly[y1]
+        groups2 = save_friendly[y2]
+
+        common_groups = set(groups1.keys()).intersection(groups2.keys())
+
+        for group in common_groups:
+            vecs1 = np.array(groups1[group])
+            vecs2 = np.array(groups2[group])
+
+            if len(vecs1) == 0 or len(vecs2) == 0:
+                continue
+
+            avg1 = np.mean(vecs1, axis=0).reshape(1, -1)
+            avg2 = np.mean(vecs2, axis=0).reshape(1, -1)
+
+            sim = float(cosine_similarity(avg1, avg2)[0][0])
+            drift_entries.append({
+                "group": group,
+                "from": y1,
+                "to": y2,
+                "similarity": sim,
+                "drift": sim - 1.0
+            })
+
+    with open("app/group_embeddings/group_tlg_scores.json", "w", encoding="utf-8") as f:
+        json.dump(drift_entries, f, indent=2)
+
     reduction_method = st.sidebar.selectbox(
         "Select Method",
         ["PCA", "t-SNE", "UMAP"],
@@ -770,6 +1535,8 @@ def main():
         filtered_df["z"] = reduced_embeddings[:, 2]
 
     st.sidebar.subheader("Visualization Settings")
+    tlg_enabled = st.sidebar.checkbox("Enable TLG Forecasting", value=False)
+    tlg_threshold = st.sidebar.slider("TLG Threshold", min_value=-1.0, max_value=1.0, value=0.2, step=0.05)
     use_custom_colors = st.sidebar.checkbox(
         "Use Custom Node Colors",
         help="Enable to manually select colors for each cluster."
@@ -883,7 +1650,14 @@ def main():
 
     st.plotly_chart(fig, use_container_width=True)
 
+    if st.button("📦 Export Document Clusters (.csv & .json)"):
+        zip_path = export_document_clusters(filtered_df)
+        with open(zip_path, "rb") as f:
+            st.download_button("⬇️ Download Cluster Export", data=f, file_name="document_clusters.zip",
+                               mime="application/zip")
+
     st.subheader("Interactive Network Graph")
+
     with st.expander("What is a Network Graph?"):
         st.markdown("""
             **Network Graph** visualizes relationships between documents.  
@@ -896,15 +1670,97 @@ def main():
         min_value=0.1,
         max_value=1.0,
         value=0.7,
-        step=0.1,
-        help="Adjust the similarity threshold to control how documents are connected in the graph."
+        step=0.1
     )
 
-    net = Visualizer.create_network_graph(filtered_df, similarity_threshold, custom_colors)
+    similarity_mode = st.radio("Similarity Method", ["cosine", "hybrid", "cs2sim", "mvfusion"]) #MVFUSION TODO
 
-    with open("network.html", "r", encoding="utf-8") as f:
-        html_content = f.read()
-    st.components.v1.html(html_content, height=600, scrolling=True)
+    if similarity_mode == "hybrid":
+        st.markdown("### Adjust Hybrid Similarity Weights (Sum ≤ 1.0)")
+
+        with st.form(key="hybrid_similarity_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                emb_weight = st.slider("Embedding weight", 0.0, 1.0, 0.60, 0.01)
+                author_weight = st.slider("Author match weight", 0.0, 1.0, 0.15, 0.01)
+                cluster_weight = st.slider("Cluster match weight", 0.0, 1.0, 0.10, 0.01)
+            with col2:
+                year_weight = st.slider("Year proximity weight", 0.0, 1.0, 0.10, 0.01)
+                keyword_weight = st.slider("Abstract keyword overlap", 0.0, 1.0, 0.05, 0.01)
+
+            weight_sum = emb_weight + author_weight + cluster_weight + year_weight + keyword_weight
+
+            if weight_sum > 1.0:
+                st.error(f"❌ Total weight = {weight_sum:.2f} (must be ≤ 1.0)")
+                st.form_submit_button("✅ Recalculate and Render", disabled=True)
+            else:
+                st.success(f"✅ Total weight = {weight_sum:.2f}")
+                recalc = st.form_submit_button("✅ Recalculate and Render")
+
+        if 'recalc' in locals() and recalc:
+            with st.spinner("Generating hybrid similarity graph..."):
+                net, G = Visualizer.create_network_graph(
+                    filtered_df,
+                    similarity_threshold,
+                    custom_colors,
+                    similarity_mode="hybrid",
+                    emb_weight=emb_weight,
+                    author_weight=author_weight,
+                    cluster_weight=cluster_weight,
+                    year_weight=year_weight,
+                    keyword_weight=keyword_weight
+                )
+                html_content = net.generate_html()
+                st.components.v1.html(html_content, height=600, scrolling=True)
+                st.success(f"{net.note}")
+
+        st.markdown("### Adjust Hybrid Similarity Weights")
+        with st.form(key="hybrid_similarity_form"):
+            emb_weight = st.slider("Embedding weight", 0.0, 1.0, 0.60, 0.05)
+            author_weight = st.slider("Author match weight", 0.0, 1.0, 0.15, 0.05)
+            cluster_weight = st.slider("Cluster match weight", 0.0, 1.0, 0.10, 0.05)
+            year_weight = st.slider("Year proximity weight", 0.0, 1.0, 0.10, 0.05)
+            keyword_weight = st.slider("Abstract keyword overlap", 0.0, 1.0, 0.05, 0.01)
+
+            recalc = st.form_submit_button("Recalculate and Render")
+
+        if recalc:
+            with st.spinner("Generating hybrid similarity graph..."):
+                net, G = Visualizer.create_network_graph(
+                    filtered_df,
+                    similarity_threshold,
+                    custom_colors,
+                    similarity_mode="hybrid",
+                    emb_weight=emb_weight,
+                    author_weight=author_weight,
+                    cluster_weight=cluster_weight,
+                    year_weight=year_weight,
+                    keyword_weight=keyword_weight
+                )
+                html_content = net.generate_html()
+                st.components.v1.html(html_content, height=600, scrolling=True)
+                st.success(f"🔗 {net.note}")
+
+    if st.button("🚀 Build Network Graph (Intensive in 200+ nodes)"):
+        with st.spinner("Generating interactive network..."):
+            net, G = Visualizer.create_network_graph(
+                filtered_df,
+                similarity_threshold,
+                custom_colors,
+                similarity_mode=similarity_mode
+            )
+
+            html_content = net.generate_html()
+            st.components.v1.html(html_content, height=600, scrolling=True)
+
+            st.success(f"🔗 **{net.note}**")
+
+    # Network graph export, doesn't work for now TODO
+    # if st.button("📦 Export Interactive Network Graph"):
+    #     zip_path = export_network_graph(filtered_df, similarity_threshold=similarity_threshold)
+    #     with open(zip_path, "rb") as f:
+    #         st.download_button("⬇️ Download Network Graph Export", data=f, file_name="network_graph.zip",
+    #                            mime="application/zip")
 
     st.subheader("Advanced Visualizations")
 
@@ -962,6 +1818,62 @@ def main():
         help="Enter a query to search for documents by title, author, or abstract."
     )
 
+    st.subheader("Knowledge Graph Viewer")
+
+    if st.button("Build Knowledge Graph (Intensive in 200+ nodes)"):
+        with st.spinner("Constructing Knowledge Graph..."):
+            kg = build_knowledge_graph(filtered_df, model=load_link_model())
+            st.session_state.kg = kg
+            st.success(f"Graph built: {len(kg.nodes)} nodes, {len(kg.edges)} edges")
+
+            try:
+                nx.write_gexf(kg, "knowledge_graph.gexf")
+                st.info("Graph saved as knowledge_graph.gexf")
+            except Exception as e:
+                st.warning(f"Export failed: {e}")
+
+            st.markdown("### Sample Relations")
+            sample_edges = list(kg.edges(data=True))[:10]
+            for u, v, data in sample_edges:
+                st.write(f"{u} -[{data['relation']}]-> {v}")
+
+            try:
+                from pyvis.network import Network
+                import streamlit.components.v1 as components
+
+                net = Network(height="600px", width="100%")
+
+                for node, data in kg.nodes(data=True):
+                    label = node[:40]
+                    color = {"document": "#8ecae6", "author": "#ffafcc", "keyword": "#ffd6a5",
+                             "cluster": "#caffbf"}.get(data.get("type"), "#ccc")
+                    net.add_node(node, label=label, color=color)
+
+                for u, v, data in kg.edges(data=True):
+                    net.add_edge(u, v, title=data.get("relation", ""))
+
+                net.save_graph("kg_vis.html")
+                with open("kg_vis.html", "r", encoding="utf-8") as f:
+                    components.html(f.read(), height=650, scrolling=True)
+
+            except Exception as e:
+                st.warning(f"Graph visualization failed: {e}")
+
+    if "kg" in st.session_state:
+        if st.button("📦 Export Neo4j + RDF + JSON Bundle"):
+            zip_path = export_all_formats(st.session_state.kg)
+            with open(zip_path, "rb") as f:
+                st.download_button(
+                    label="⬇️ Download All Graph Formats (.zip)",
+                    data=f,
+                    file_name="knowledge_graph_bundle.zip",
+                    mime="application/zip"
+                )
+
+    if st.checkbox("Show all relations"):
+        for u, v, data in kg.edges(data=True):
+            st.write(f"{u} -[{data['relation']}]-> {v}")
+
     similarity_threshold = st.sidebar.slider(
         "Similarity Threshold",
         min_value=0.0,
@@ -1013,6 +1925,133 @@ def main():
         citation_count = ExternalAPIs.fetch_citation_count(citation_query)
         st.write(f"**Citation Count:** {citation_count}")
 
+    st.subheader("Contextual Graph Evolution Explorer")
+
+    if "context_history" not in st.session_state:
+        st.session_state.context_history = []
+
+    def select_context(name):
+        cluster = st.selectbox(f"{name}: Cluster", ["All"] + sorted(filtered_df["cluster"].unique()),
+                               key=f"{name}_cluster")
+        year_range = st.slider(f"{name}: Year Range", 2010, 2025, (2015, 2023), key=f"{name}_year")
+        threshold = st.slider(f"{name}: Link Threshold", 0.5, 0.95, 0.8, 0.01, key=f"{name}_thresh")
+        return {"cluster": cluster, "year_range": year_range, "threshold": threshold}
+
+    ctx1 = select_context("Context 1")
+    ctx2 = select_context("Context 2")
+
+    if st.button("Save Contexts to History"):
+        st.session_state.context_history.append((ctx1, ctx2))
+        st.success("Contexts saved.")
+
+    def apply_context(df, ctx):
+        result = df[df["year"].between(ctx["year_range"][0], ctx["year_range"][1])]
+        if ctx["cluster"] != "All":
+            result = result[result["cluster"] == ctx["cluster"]]
+        return result
+
+    df1 = apply_context(filtered_df, ctx1)
+    df2 = apply_context(filtered_df, ctx2)
+
+    model = load_link_model()
+    G1 = build_dynamic_graph(df1, model, threshold=ctx1["threshold"])
+    G2 = build_dynamic_graph(df2, model, threshold=ctx2["threshold"])
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### 🔹 Context 1")
+        st.write(f"{len(G1.nodes)} nodes, {len(G1.edges)} edges")
+        from pyvis.network import Network
+        import streamlit.components.v1 as components
+
+        net1 = Network(height="500px", width="100%")
+        for node in G1.nodes:
+            data = G1.nodes[node]
+            cluster = data.get("metadata", {}).get("cluster", "Unknown")
+            net1.add_node(node, label=node, title=cluster, group=cluster)
+        for u, v, data in G1.edges(data=True): net1.add_edge(u, v, value=data["weight"])
+        net1.save_graph("graph1.html")
+        components.html(open("graph1.html", "r").read(), height=550)
+
+    with col2:
+        st.markdown("### 🔸 Context 2")
+        st.write(f"{len(G2.nodes)} nodes, {len(G2.edges)} edges")
+        net2 = Network(height="500px", width="100%")
+        for node in G2.nodes:
+            data = G2.nodes[node]
+            cluster = data.get("metadata", {}).get("cluster", "Unknown")
+            net2.add_node(node, label=node, title=cluster, group=cluster)
+        for u, v, data in G2.edges(data=True): net2.add_edge(u, v, value=data["weight"])
+        net2.save_graph("graph2.html")
+        components.html(open("graph2.html", "r").read(), height=550)
+
+    def compare_graphs(G1, G2):
+        edges1 = set(G1.edges())
+        edges2 = set(G2.edges())
+        intersection = edges1 & edges2
+        union = edges1 | edges2
+        jaccard = len(intersection) / len(union) if union else 0
+        gained = edges2 - edges1
+        lost = edges1 - edges2
+        return jaccard, list(gained), list(lost)
+
+    st.markdown("### 📊 Graph Comparison Metrics")
+    jaccard, gained, lost = compare_graphs(G1, G2)
+    st.write(f"**Jaccard Similarity (edges):** `{jaccard:.4f}`")
+    st.write(f"🔼 **Links Gained in Context 2:** {len(gained)}")
+    st.write(f"🔽 **Links Lost in Context 2:** {len(lost)}")
+
+    if st.checkbox("🔍 Show Edge Changes"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Gained Links**")
+            for u, v in gained:
+                st.write(f"{u} ↔ {v}")
+        with col2:
+            st.markdown("**Lost Links**")
+            for u, v in lost:
+                st.write(f"{u} ↔ {v}")
+
+    os.makedirs("app/group_embeddings", exist_ok=True)
+    with open("app/group_embeddings/group_embeddings_by_year.json", "w", encoding="utf-8") as f:
+        json.dump(grouped_embeddings_by_year, f, indent=2, ensure_ascii=False)
+
+    st.markdown("### Group-Level Drift Between Contexts")
+
+    drift_data = load_group_drift("app/group_embeddings/group_tlg_scores.json")
+
+    drift_net = Network(height="500px", width="100%", notebook=False, directed=True)
+
+    ctx1_years = range(ctx1["year_range"][0], ctx1["year_range"][1] + 1)
+    ctx2_years = range(ctx2["year_range"][0], ctx2["year_range"][1] + 1)
+
+    for entry in drift_data:
+        group = entry["group"]
+        y1 = int(entry["from"])
+        y2 = int(entry["to"])
+        drift = entry["drift"]
+        sim = entry["similarity"]
+
+        if y1 in ctx1_years and y2 in ctx2_years:
+            n1 = f"{group}_{y1}"
+            n2 = f"{group}_{y2}"
+            color = "green" if drift >= 0 else "red"
+            width = min(5, max(1.5, abs(drift * 5)))
+
+            drift_net.add_node(n1, label=f"{group} ({y1})", group=group, shape="ellipse")
+            drift_net.add_node(n2, label=f"{group} ({y2})", group=group, shape="ellipse")
+
+            drift_net.add_edge(
+                n1, n2,
+                title=f"Δ: {drift:.2f}",
+                value=abs(drift),
+                color=color,
+                arrows="to",
+                width=width
+            )
+
+    st.components.v1.html(drift_net.generate_html(), height=520, scrolling=True)
+
     st.subheader("🔗 Dynamic Document Graph (LSTM-Based)")
     with st.expander("View and Explore Dynamic Graph", expanded=False):
 
@@ -1020,20 +2059,19 @@ def main():
         model = load_link_model()
         G = build_dynamic_graph(filtered_df, model, threshold=threshold)
 
-        st.markdown(f"📌 Graph contains `{len(G.nodes)}` documents and `{len(G.edges)}` predicted links")
+        st.markdown(f"Graph contains `{len(G.nodes)}` documents and `{len(G.edges)}` predicted links")
 
-        # Optionally show network as edge list
         if st.checkbox("Show edge list"):
             edges = list(G.edges(data=True))
             for u, v, data in edges:
                 st.write(f"{u} ↔ {v} (score: {data['weight']:.3f})")
 
-        # Optional: Visualize using pyvis or plotly
         try:
             from pyvis.network import Network
             import streamlit.components.v1 as components
 
             net = Network(height="600px", width="100%", notebook=False)
+
             for node in G.nodes:
                 net.add_node(node, label=node, title=node)
 
@@ -1048,6 +2086,34 @@ def main():
         except Exception as e:
             st.warning("Graph visualization skipped (install `pyvis` to enable).")
             st.text(str(e))
+
+    # doesn't work for now TODO
+    # st.subheader("🔍 Explain LSTM Link Prediction (SHAP)")
+    #
+    # model = load_link_model()
+    #
+    # def predict_fn(X):
+    #     with torch.no_grad():
+    #         X_tensor = torch.tensor(X, dtype=torch.float32)
+    #         out = model(X_tensor)
+    #         return out.detach().numpy().reshape(-1, 1)
+    #
+    # explainer = load_shap_explainer(model, filtered_df)
+    #
+    # titles = list(filtered_df["title"])
+    # doc1_title = st.selectbox("Document A", titles)
+    # doc2_title = st.selectbox("Document B", titles, index=1)
+    #
+    # doc1 = filtered_df[filtered_df["title"] == doc1_title].iloc[0]
+    # doc2 = filtered_df[filtered_df["title"] == doc2_title].iloc[0]
+    #
+    # features = prepare_lstm_features(doc1, doc2)
+    # shap_values = explainer.shap_values(np.array([features]))
+    #
+    # st.write(f"Predicted score: {predict_fn([features])[0]:.3f}")
+    # st.set_option('deprecation.showPyplotGlobalUse', False)
+    # shap.plots.bar(shap_values[0], show=False)
+    # st.pyplot(bbox_inches="tight")
 
     st.subheader("📄 Document Comparison Tool (Side-by-Side)")
     with st.expander("Compare Two Documents", expanded=False):
@@ -1084,20 +2150,19 @@ def main():
 
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown(f"### 📘 {doc1['title']}")
+                st.markdown(f"###  {doc1['title']}")
                 st.markdown(f"**Authors:** {doc1['authors']}")
                 st.markdown(f"**Year:** {doc1['year']}  \n**Cluster:** `{doc1['cluster']}`")
                 st.markdown("**Abstract:**")
                 st.write(doc1["abstract"])
 
             with col2:
-                st.markdown(f"### 📗 {doc2['title']}")
+                st.markdown(f"###  {doc2['title']}")
                 st.markdown(f"**Authors:** {doc2['authors']}")
                 st.markdown(f"**Year:** {doc2['year']}  \n**Cluster:** `{doc2['cluster']}`")
                 st.markdown("**Abstract:**")
                 st.write(doc2["abstract"])
 
-            # Keyword Explanation Section
             def extract_keywords(text, top_n=10):
                 stop_words = set(stopwords.words('english'))
                 words = word_tokenize(text.lower())
@@ -1112,7 +2177,7 @@ def main():
             unique_kw1 = sorted(kw1 - kw2)
             unique_kw2 = sorted(kw2 - kw1)
 
-            st.markdown("### 🧠 Explanation: Why Are They Similar/Different?")
+            st.markdown("### Explanation: Why Are They Similar/Different?")
             st.markdown("**Shared Keywords:**")
             st.write(", ".join(shared_kw) if shared_kw else "*None*")
 
@@ -1124,6 +2189,193 @@ def main():
                 st.markdown("**Unique to Document 2:**")
                 st.write(", ".join(unique_kw2) if unique_kw2 else "*None*")
 
+    st.subheader("Influence Network")
+
+    num_vis_docs = st.slider("Number of Top Influential Documents in Network", 5, 30, 10)
+
+    net = Network(height="650px", width="100%", notebook=False)
+
+    net.barnes_hut(
+        gravity=-8000,
+        central_gravity=0.3,
+        spring_length=300,
+        spring_strength=0.005,
+        damping=0.1
+    )
+
+    for doc in influence_scores[:num_vis_docs]:
+        net.add_node(
+            doc["title"],
+            label=f'{doc["title"][:50]} ({doc["year"]})',
+            title=f'Influence: {doc["influence_score"]:.2f}<br>Cluster: {doc["cluster"]}',
+            size=10 + doc["influence_score"] * 5,
+            color="orange"
+        )
+
+    years_sorted = sorted(filtered_df["year"].unique())
+    for doc in influence_scores[:num_vis_docs]:
+        source = doc["title"]
+        embedding_row = filtered_df[filtered_df["title"] == doc["title"]]
+        if embedding_row.empty:
+            continue
+        doc_emb = np.array(embedding_row.iloc[0]["embedding"]).reshape(1, -1)
+
+        top_links = []
+        doc_year_index = years_sorted.index(doc["year"])
+
+        for future_year in years_sorted[doc_year_index + 1:]:
+            for cluster, centroid in centroids_by_year[future_year].items():
+                target = f"{cluster} ({future_year})"
+                sim = cosine_similarity(doc_emb, centroid.reshape(1, -1))[0][0]
+                top_links.append((sim, target, future_year, cluster))
+
+        top_links = sorted(top_links, reverse=True)[:2]
+
+        for sim, target, future_year, cluster in top_links:
+            net.add_node(target, label=target, color="lightblue", shape="ellipse")
+
+            min_width = 0.1
+            max_width = 20
+            thickness = min_width + (sim ** 2) * (max_width - min_width)
+
+            label = f"📘 Future cluster: {cluster} ({future_year})\n Similarity: {sim:.3f}"
+
+            net.add_edge(
+                source,
+                target,
+                color="red",
+                width=thickness,
+                title=label,
+                arrows="to"
+            )
+
+    net.save_graph("app/influence_network.html")
+    HtmlFile = open("app/influence_network.html", "r", encoding="utf-8")
+    components.html(HtmlFile.read(), height=650, width=None)
+
+    st.subheader("Explain Link Prediction")
+
+    doc_titles = list(filtered_df["title"])
+    doc1_title = st.selectbox("Document A", doc_titles, key="shap_doc1")
+    doc2_title = st.selectbox("Document B", doc_titles, key="shap_doc2", index=min(1, len(doc_titles) - 1))
+
+    if st.button("Explain Influence Prediction"):
+        with st.spinner("Calculating feature importance..."):
+            doc1 = filtered_df[filtered_df["title"] == doc1_title].iloc[0]
+            doc2 = filtered_df[filtered_df["title"] == doc2_title].iloc[0]
+
+            features = prepare_lstm_features(doc1, doc2)
+
+            pred_score = predict_link_score(doc1["embedding"], doc2["embedding"], model)
+            st.markdown(f"### Predicted Influence Score: `{pred_score:.4f}`")
+
+            explain_fn, expected_value = load_custom_shap_explainer(_model=model, df=filtered_df)
+
+            try:
+                start_time = time.time()
+                feature_importances, baseline = explain_fn(features)
+                end_time = time.time()
+
+                st.markdown(f"### Feature Importance Analysis (Computed in {end_time - start_time:.2f}s)")
+
+                emb_dim = len(features) // 3
+
+                expanded_top_words = compute_dim_keywords_from_abstracts("app/fused_documents.json")
+
+                feature_names = get_feature_labels_from_dim_words(expanded_top_words)
+
+                shap.plots.bar(
+                    shap.Explanation(
+                        values=feature_importances,
+                        base_values=baseline,
+                        feature_names=feature_names
+                    ),
+                    show=False
+                )
+
+                top_n = 20
+                sorted_idx = np.argsort(np.abs(feature_importances))[-top_n:]
+
+                fig, ax = plt.subplots(figsize=(10, 8))
+
+                y_pos = np.arange(len(sorted_idx))
+                ax.barh(y_pos,
+                        feature_importances[sorted_idx],
+                        color=['#1E88E5' if x > 0 else '#FF0D57' for x in feature_importances[sorted_idx]])
+
+                ax.set_yticks(y_pos)
+                ax.set_yticklabels([feature_names[i] for i in sorted_idx])
+                ax.invert_yaxis()
+                ax.set_xlabel('Impact on prediction')
+                ax.set_title('Top Feature Importances')
+
+                ax.axvline(x=0, color='black', linestyle='-', alpha=0.3)
+
+                import matplotlib.patches as mpatches
+                positive_patch = mpatches.Patch(color='#1E88E5', label='Increases score')
+                negative_patch = mpatches.Patch(color='#FF0D57', label='Decreases score')
+                ax.legend(handles=[positive_patch, negative_patch])
+
+                st.pyplot(fig)
+
+                st.markdown("### 💡 Interpretation")
+                st.markdown("""
+                    - **Positive values (blue)**: These features increase the predicted influence score 
+                    - **Negative values (red)**: These features decrease the predicted influence score
+                    - **Larger bars**: Higher impact on the model's prediction
+                    """)
+
+                st.markdown("### 📑 Document Contribution Analysis")
+
+                doc1_imp = np.sum(np.abs(feature_importances[:emb_dim]))
+                doc2_imp = np.sum(np.abs(feature_importances[emb_dim:2 * emb_dim]))
+                diff_imp = np.sum(np.abs(feature_importances[2 * emb_dim:]))
+                total_imp = doc1_imp + doc2_imp + diff_imp
+
+                fig, ax = plt.subplots(figsize=(8, 8))
+                ax.pie([doc1_imp, doc2_imp, diff_imp],
+                       labels=[f"Document A\n({doc1_imp / total_imp:.1%})",
+                               f"Document B\n({doc2_imp / total_imp:.1%})",
+                               f"Difference\n({diff_imp / total_imp:.1%})"],
+                       autopct='%1.1f%%',
+                       colors=['#1E88E5', '#FF0D57', '#33BB33'])
+                ax.set_title('Contribution by Feature Group')
+                st.pyplot(fig)
+
+                st.markdown("Semantic Explanation (Offline LLM)")
+                explanation = generate_local_semantic_explanation(doc1, doc2)
+                st.markdown("### Offline LLM Explanation")
+                st.markdown(f"> {explanation}")
+
+            except Exception as e:
+                st.error(f"Error calculating feature importance: {str(e)}")
+                st.code(str(e), language="python")
+
+    with st.expander("Semantic Drift-Aware Forecasting (SDAF)", expanded=False):
+        filtered_df.to_csv("filtered_df_example.csv", index=False)
+
+        def df_to_docs(df):
+            docs = []
+            for _, row in df.iterrows():
+                try:
+                    embed = row["embedding"]
+                    if isinstance(embed, str):
+                        embed = literal_eval(embed)
+                    docs.append({
+                        "cluster": row.get("cluster"),
+                        "specter_embedding": embed,
+                        "year": int(row.get("year", 0))
+                    })
+                except Exception as e:
+                    continue
+            return docs
+
+        filtered_docs = df_to_docs(filtered_df)
+        show_dynamic_sdaf_section(filtered_docs)
+
+    export_cosine_graph(filtered_df, similarity_threshold=0.8)
+    export_lstm_graph(filtered_df, model, threshold=0.3)
+
     st.subheader("Cluster Details")
     with st.expander("View Documents in Each Cluster"):
         for cluster_name, group in filtered_df.groupby("cluster"):
@@ -1131,6 +2383,7 @@ def main():
             st.write(group[["title", "authors", "year", "abstract"]])
 
     add_pdf_summarization()
+
 
 if __name__ == "__main__":
     main()

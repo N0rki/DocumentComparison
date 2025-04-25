@@ -8,16 +8,8 @@ from database_connection import connect_to_chromadb
 # Download WordNet data
 nltk.download('wordnet')
 
+
 def expand_query(query):
-    """
-    Expand a query using synonyms from WordNet.
-
-    Args:
-        query (str): The input query.
-
-    Returns:
-        str: The expanded query.
-    """
     synonyms = set()
     for word in query.split():
         for syn in wordnet.synsets(word):
@@ -27,16 +19,6 @@ def expand_query(query):
 
 
 def query_similar_documents(query_text, top_k=5):
-    """
-    Query similar documents from the ChromaDB collection using precomputed embeddings.
-
-    Args:
-        query_text (str): The input query.
-        top_k (int): Number of similar documents to retrieve.
-
-    Returns:
-        dict: Query results containing documents, metadata, and distances.
-    """
     try:
         chroma_client, collection = connect_to_chromadb()
 
@@ -86,6 +68,7 @@ def main():
         print(f"\nERROR in query execution: {str(e)}")
         print("=== Query execution failed ===")
         raise
+
 
 if __name__ == "__main__":
     main()

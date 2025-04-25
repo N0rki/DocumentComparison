@@ -5,9 +5,17 @@
     <title>ChromaDB Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .container { max-width: 1200px; }
-        .card { margin-bottom: 20px; }
-        .flash-messages { margin-top: 20px; }
+        .container {
+            max-width: 1200px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .flash-messages {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -16,14 +24,15 @@
 
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show"
+             role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
@@ -36,7 +45,8 @@
                 <div class="card-body">
                     <form action="{{ url_for('create_collection') }}" method="post" class="mb-4">
                         <div class="input-group">
-                            <input type="text" class="form-control" name="collection_name" placeholder="New Collection Name" required>
+                            <input type="text" class="form-control" name="collection_name"
+                                   placeholder="New Collection Name" required>
                             <button type="submit" class="btn btn-primary">Create Collection</button>
                         </div>
                     </form>
@@ -44,31 +54,34 @@
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Documents</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Documents</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {% for collection in collections %}
-                                <tr>
-                                    <td>{{ collection.name }}</td>
-                                    <td>{{ collection.count }}</td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ url_for('view_collection', collection_name=collection.name) }}" class="btn btn-info">View</a>
-                                            <form action="{{ url_for('delete_collection', collection_name=collection.name) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this collection?');">
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="3" class="text-center">No collections found</td>
-                                </tr>
-                                {% endfor %}
+                            {% for collection in collections %}
+                            <tr>
+                                <td>{{ collection.name }}</td>
+                                <td>{{ collection.count }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('view_collection', collection_name=collection.name) }}" style="text-align: center; text-decoration: none; display: inline-block; padding: 7px 14px;"
+                                           class="btn btn-primary" >View</a>
+                                        <form action="{{ url_for('delete_collection', collection_name=collection.name) }}"
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this collection?');">
+                                            <button type="submit" class="btn btn-danger" style="border-bottom-left-radius: 0;border-top-left-radius: 0">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No collections found</td>
+                            </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -76,17 +89,22 @@
                     <div class="mb-3">
                         <label for="directory_preview_select" class="form-label">Select directory to preview</label>
                         <div class="input-group mb-2">
-                            <select class="form-select" id="directory_preview_select" onchange="showDirectoryPreview(this.value)">
+                            <select class="form-select" id="directory_preview_select"
+                                    onchange="showDirectoryPreview(this.value)">
                                 <option value="" disabled selected>Select a folder</option>
                                 {% for dir in directories %}
                                 <option value="{{ dir }}">{{ dir }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="button" class="btn btn-outline-secondary" onclick="refreshDirectoryPreview()">⟳</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="refreshDirectoryPreview()">
+                                ⟳
+                            </button>
                         </div>
-                        <small class="text-muted" id="directory-file-count" style="display: none;">Files: <span id="file-count">0</span></small>
+                        <small class="text-muted" id="directory-file-count" style="display: none;">Files: <span
+                                id="file-count">0</span></small>
                     </div>
-                    <div id="directory-preview-box" class="border rounded p-3 mb-3" style="max-height: 300px; overflow-y: auto; display: none;">
+                    <div id="directory-preview-box" class="border rounded p-3 mb-3"
+                         style="max-height: 300px; overflow-y: auto; display: none;">
                         <h6>Files:</h6>
                         <div class="row" id="directory-preview"></div>
                     </div>
@@ -105,33 +123,35 @@
                         <div class="mb-3">
                             <label for="download_directory" class="form-label">Target Directory</label>
                             <select class="form-select" id="download_directory" name="download_directory">
-    <option value="" selected disabled>Select a folder</option>
-    <option value="__NEW__">New Directory (auto-named)</option>
+                                <option value="" selected disabled>Select a folder</option>
+                                <option value="__NEW__">New Directory (auto-named)</option>
                                 {% for dir in directories %}
                                 <option value="{{ dir }}">{{ dir }}</option>
                                 {% endfor %}
                             </select>
+                            </select>
                         </div>
                         <div class="mb-3">
-    <label for="category" class="form-label">Select Category (optional):</label>
-    <select id="category" name="category" class="form-select">
-        <option value="">Random (no filter)</option>
-        <option value="cs.AI">Artificial Intelligence</option>
-        <option value="cs.CL">Computation and Language</option>
-        <option value="cs.LG">Machine Learning</option>
-        <option value="cs.CV">Computer Vision</option>
-        <option value="cs.DS">Data Structures and Algorithms</option>
-        <option value="econ.EM">Econometrics</option>
-        <option value="physics.gen-ph">General Physics</option>
-        <option value="q-bio">Quantitative Biology</option>
-        <option value="stat.ML">Statistical Machine Learning</option>
-    </select>
-</div>
+                            <label for="category" class="form-label">Select Category (optional):</label>
+                            <select id="category" name="category" class="form-select">
+                                <option value="">Random (no filter)</option>
+                                <option value="cs.AI">Artificial Intelligence</option>
+                                <option value="cs.CL">Computation and Language</option>
+                                <option value="cs.LG">Machine Learning</option>
+                                <option value="cs.CV">Computer Vision</option>
+                                <option value="cs.DS">Data Structures and Algorithms</option>
+                                <option value="econ.EM">Econometrics</option>
+                                <option value="physics.gen-ph">General Physics</option>
+                                <option value="q-bio">Quantitative Biology</option>
+                                <option value="stat.ML">Statistical Machine Learning</option>
+                            </select>
+                        </div>
                         <div class="input-group mb-3">
-    <label for="pdf_count" class="input-group-text">Number of PDFs:</label>
-    <input type="number" id="pdf_count" name="pdf_count" class="form-control" value="5" min="1" max="500">
-    <button type="submit" class="btn btn-primary">Download PDFs</button>
-</div>
+                            <label for="pdf_count" class="input-group-text">Number of PDFs:</label>
+                            <input type="number" id="pdf_count" name="pdf_count" class="form-control" value="5" min="1"
+                                   max="10000">
+                            <button type="submit" class="btn btn-primary">Download PDFs</button>
+                        </div>
                     </form>
 
                     <form action="{{ url_for('vectorize_pdfs') }}" method="post" class="mt-4">
@@ -179,17 +199,33 @@
                     </div>
                 </div>
                 <div class="card mt-4">
-    <div class="card-header">
-        <h5>Interactive Dashboard</h5>
-    </div>
-    <div class="card-body">
-        <p class="mb-2">Launch the interactive Streamlit dashboard to explore documents in 3D and access advanced tools.</p>
-        <form action="{{ url_for('launch_dashboard') }}" method="post">
-            <button type="submit" class="btn btn-outline-primary w-100">Launch Streamlit Dashboard</button>
-        </form>
-        <small class="text-muted d-block mt-2">Runs on <a href="http://localhost:8501" target="_blank">http://localhost:8501</a></small>
-    </div>
-</div>
+                    <div class="card-body">
+                        <form method="post" id="launch-form">
+                            <label for="dashboard_collection_name" class="form-label">Select Collection</label>
+                            <select name="collection_name" id="dashboard_collection_name" class="form-select mb-2">
+                                {% for c in collections %}
+                                <option value="{{ c.name }}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit" class="btn btn-outline-primary w-100" id="launch-btn">Launch Streamlit
+                                Dashboard
+                            </button>
+                        </form>
+                        <small class="text-muted d-block mt-2">Runs on <a href="http://localhost:8501" target="_blank">http://localhost:8501</a></small>
+                    </div>
+
+                    <script>
+                        const form = document.getElementById("launch-form");
+                        const btn = document.getElementById("launch-btn");
+                        const select = document.getElementById("dashboard_collection_name");
+
+                        btn.addEventListener("click", function () {
+                            const selected = select.value;
+                            form.action = `/launch-dashboard/${selected}`;
+                        });
+                    </script>
+                </div>
             </div>
         </div>
     </div>
@@ -197,113 +233,113 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function refreshDirectoryPreview() {
-    refreshDirectoryList();
-    const select = document.getElementById('directory_preview_select');
-    const selected = select.value;
-    if (selected) {
-        showDirectoryPreview(selected);
+    function refreshDirectoryPreview() {
+        refreshDirectoryList();
+        const select = document.getElementById('directory_preview_select');
+        const selected = select.value;
+        if (selected) {
+            showDirectoryPreview(selected);
+        }
     }
-}
 
-function showDirectoryPreview(directory) {
-    const previewBox = document.getElementById('directory-preview-box');
-    const preview = document.getElementById('directory-preview');
-    const countDisplay = document.getElementById('directory-file-count');
-    const fileCount = document.getElementById('file-count');
-    if (!directory) {
-        preview.innerHTML = '';
-        previewBox.style.display = 'none';
-        countDisplay.style.display = 'none';
-        return;
-    }
-    fetch(`/list-files/${directory}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.files && data.files.length > 0) {
-                const columns = data.files.map(f => `
+    function showDirectoryPreview(directory) {
+        const previewBox = document.getElementById('directory-preview-box');
+        const preview = document.getElementById('directory-preview');
+        const countDisplay = document.getElementById('directory-file-count');
+        const fileCount = document.getElementById('file-count');
+        if (!directory) {
+            preview.innerHTML = '';
+            previewBox.style.display = 'none';
+            countDisplay.style.display = 'none';
+            return;
+        }
+        fetch(`/list-files/${directory}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.files && data.files.length > 0) {
+                    const columns = data.files.map(f => `
                     <div class="col-md-4 mb-2">
                         <div class="border rounded p-2 bg-light text-truncate" title="${f}">${f}</div>
                     </div>`).join('');
-                preview.innerHTML = columns;
+                    preview.innerHTML = columns;
+                    previewBox.style.display = 'block';
+                    countDisplay.style.display = 'inline';
+                    fileCount.textContent = data.files.length;
+                } else {
+                    preview.innerHTML = `<div class='alert alert-info'>No PDF files found in ${directory}</div>`;
+                    previewBox.style.display = 'block';
+                    countDisplay.style.display = 'inline';
+                    fileCount.textContent = 0;
+                }
+            })
+            .catch(err => {
+                preview.innerHTML = `<div class='alert alert-danger'>Error loading files: ${err}</div>`;
                 previewBox.style.display = 'block';
-                countDisplay.style.display = 'inline';
-                fileCount.textContent = data.files.length;
-            } else {
-                preview.innerHTML = `<div class='alert alert-info'>No PDF files found in ${directory}</div>`;
-                previewBox.style.display = 'block';
-                countDisplay.style.display = 'inline';
-                fileCount.textContent = 0;
-            }
-        })
-        .catch(err => {
-            preview.innerHTML = `<div class='alert alert-danger'>Error loading files: ${err}</div>`;
-            previewBox.style.display = 'block';
-            countDisplay.style.display = 'none';
-        });
-}
-
-window.addEventListener('DOMContentLoaded', function() {
-    fetchStatus();
-    setInterval(fetchStatus, 30000);
-});
-
-function fetchStatus() {
-    fetch('/status')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('model-status').textContent = data.model_loaded ? 'Loaded' : 'Not Loaded';
-            document.getElementById('device-status').textContent = data.device;
-            document.getElementById('pdf-count').textContent = data.pdf_count;
-            document.getElementById('model-status').className = data.model_loaded ? 'badge bg-success' : 'badge bg-warning';
-        })
-        .catch(error => {
-            console.error('Error fetching status:', error);
-        });
-}
-
-function refreshDirectoryList() {
-    fetch('/list-directories')
-        .then(res => res.json())
-        .then(data => {
-            const previewSelect = document.getElementById('directory_preview_select');
-            const vectorSelect = document.getElementById('directory_name');
-            const downloadSelect = document.getElementById('download_directory');
-            if (!data.directories) return;
-
-            previewSelect.innerHTML = '<option value="" disabled selected>Select a folder</option>';
-            vectorSelect.innerHTML = '<option value="" disabled selected>Select a folder</option>';
-            downloadSelect.innerHTML = '<option value="" disabled selected>Select a folder</option><option value="__NEW__">New Directory (auto-named)</option>';
-
-            data.directories.forEach(dir => {
-                const option1 = new Option(dir, dir);
-                const option2 = new Option(dir, dir);
-                const option3 = new Option(dir, dir);
-                previewSelect.add(option1);
-                vectorSelect.add(option2);
-                downloadSelect.add(option3);
+                countDisplay.style.display = 'none';
             });
-        })
-        .catch(err => {
-            console.error('Error refreshing directories:', err);
-        });
-}
+    }
 
-function reloadModel() {
-    fetch('/reload-model', { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert('Model reloaded successfully.');
-                fetchStatus();
-            } else {
-                alert('Model reload failed: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(err => {
-            alert('Model reload error: ' + err);
-        });
-}
+    window.addEventListener('DOMContentLoaded', function () {
+        fetchStatus();
+        setInterval(fetchStatus, 30000);
+    });
+
+    function fetchStatus() {
+        fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('model-status').textContent = data.model_loaded ? 'Loaded' : 'Not Loaded';
+                document.getElementById('device-status').textContent = data.device;
+                document.getElementById('pdf-count').textContent = data.pdf_count;
+                document.getElementById('model-status').className = data.model_loaded ? 'badge bg-success' : 'badge bg-warning';
+            })
+            .catch(error => {
+                console.error('Error fetching status:', error);
+            });
+    }
+
+    function refreshDirectoryList() {
+        fetch('/list-directories')
+            .then(res => res.json())
+            .then(data => {
+                const previewSelect = document.getElementById('directory_preview_select');
+                const vectorSelect = document.getElementById('directory_name');
+                const downloadSelect = document.getElementById('download_directory');
+                if (!data.directories) return;
+
+                previewSelect.innerHTML = '<option value="" disabled selected>Select a folder</option>';
+                vectorSelect.innerHTML = '<option value="" disabled selected>Select a folder</option>';
+                downloadSelect.innerHTML = '<option value="" disabled selected>Select a folder</option><option value="__NEW__">New Directory (auto-named)</option>';
+
+                data.directories.forEach(dir => {
+                    const option1 = new Option(dir, dir);
+                    const option2 = new Option(dir, dir);
+                    const option3 = new Option(dir, dir);
+                    previewSelect.add(option1);
+                    vectorSelect.add(option2);
+                    downloadSelect.add(option3);
+                });
+            })
+            .catch(err => {
+                console.error('Error refreshing directories:', err);
+            });
+    }
+
+    function reloadModel() {
+        fetch('/reload-model', {method: 'POST'})
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Model reloaded successfully.');
+                    fetchStatus();
+                } else {
+                    alert('Model reload failed: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                alert('Model reload error: ' + err);
+            });
+    }
 </script>
 </body>
 </html>

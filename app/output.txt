@@ -1,0 +1,18 @@
+{
+  "id": "Accelerated Airfoil Design Using Neural Network Approaches.pdf",
+  "embedding": [
+    -0.17845351994037628,
+    0.01192588359117508,
+    ...
+    0.07225353270769119,
+    0.6351509690284729
+  ],
+  "metadata": {
+    "abstract": "In this paper, prediction of airfoil shape from targeted pressure distribution (suction and pressure sides) \nand vice versa is demonstrated using both Convolutional Neural Networks (CNNs) and Deep Neural \nNetworks (DNNs) techniques. The dataset is generated for 1600 airfoil shapes, with simulations carried \nout at Reynolds numbers (Re) ranging from 10,000 and 90,00,000 and angles of attack (AoA) ranging \nfrom 0 to 15 degrees, ensuring the dataset captured diverse aerodynamic conditions. Five different CNN \nand DNN models are developed depending on the input/output parameters. Results demonstrate that the \nrefined models exhibit improved efficiency, with the DNN model achieving a multi-fold reduction in \ntraining time compared to the CNN model for complex datasets consisting of varying airfoil, Re, and \nAoA. The predicted airfoil shapes/pressure distribution closely match the targeted values, validating the \neffectiveness of deep learning frameworks. However, the performance of CNN models is found to be \nbetter compared to DNN models. Lastly, a flying wing aircraft model of wingspan >10 m is considered \nfor the prediction of pressure distribution along the chordwise. The proposed CNN and DNN models \nshow promising results. This research underscores the potential of deep learning models accelerating \naerodynamic optimization and advancing the design of high-performance airfoils. \nKeywords: Airfoil, Convolutional Neural Networks (CNN), Deep Neural Networks (DNN), \nReynold number (Re), Angle of attack (AoA) \n \n1.",
+    "authors": "Anantram Patel, Nikhil Mogre, Mandar Mane, Jayavardhan Reddy Enumula, Vijay Kumar Sutrakar",
+    "filename": "Accelerated Airfoil Design Using Neural Network Approaches.pdf",
+    "title": "Accelerated Airfoil Design Using Neural Network Approaches",
+    "year": 2021
+  }
+}
+

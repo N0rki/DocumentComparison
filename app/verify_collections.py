@@ -2,6 +2,7 @@ import numpy as np
 import chromadb
 from chromadb.config import Settings
 
+
 def verify_collection(collection_name="research_documents", host="localhost", port=8000):
     """
     Verify that the collection was created and updated successfully in ChromaDB.

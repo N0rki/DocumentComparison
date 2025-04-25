@@ -5,18 +5,6 @@ import torch
 
 
 def summarize_text(text, max_length=130, min_length=30, model_name="facebook/bart-large-cnn"):
-    """
-    Summarize the given text using a pre-trained model.
-
-    Parameters:
-    text (str): The text to summarize
-    max_length (int): Maximum length of the summary
-    min_length (int): Minimum length of the summary
-    model_name (str): The pre-trained model to use
-
-    Returns:
-    str: The generated summary
-    """
     try:
         if not text or len(text.strip()) == 0:
             return "Error: Empty text provided for summarization."
@@ -47,18 +35,6 @@ def summarize_text(text, max_length=130, min_length=30, model_name="facebook/bar
 
 
 def chunk_and_summarize(text, max_chunk_size=1000, max_length=130, min_length=30):
-    """
-    Chunk the text and summarize each chunk, then combine the results.
-
-    Parameters:
-    text (str): The text to summarize
-    max_chunk_size (int): Maximum size of each chunk in words
-    max_length (int): Maximum length of each chunk summary
-    min_length (int): Minimum length of each chunk summary
-
-    Returns:
-    str: The combined summary
-    """
     if not text:
         return "Error: Empty text provided for summarization."
 

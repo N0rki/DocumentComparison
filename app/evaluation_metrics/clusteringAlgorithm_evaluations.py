@@ -30,9 +30,11 @@ MODELS = {
 CLUSTERERS = {
     "KMeans": lambda X: KMeans(n_clusters=5, random_state=42).fit_predict(X),
     "Agglomerative": lambda X: AgglomerativeClustering(n_clusters=5).fit_predict(X),
-    "Spectral": lambda X: SpectralClustering(n_clusters=5, affinity="nearest_neighbors", assign_labels="kmeans").fit_predict(X),
+    "Spectral": lambda X: SpectralClustering(n_clusters=5, affinity="nearest_neighbors",
+                                             assign_labels="kmeans").fit_predict(X),
     "HDBSCAN": lambda X: hdbscan.HDBSCAN(min_cluster_size=3).fit_predict(X)
 }
+
 
 def extract_text_from_pdf(pdf_path, max_pages=2):
     try:
@@ -46,6 +48,7 @@ def extract_text_from_pdf(pdf_path, max_pages=2):
         print(f"Error reading {pdf_path}: {e}")
         return ""
 
+
 def load_texts_from_folder(folder_path):
     docs = []
     filenames = []
@@ -57,6 +60,7 @@ def load_texts_from_folder(folder_path):
                 docs.append(text)
                 filenames.append(fname)
     return docs, filenames
+
 
 def encode_with_huggingface(model_id, docs):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -73,9 +77,11 @@ def encode_with_huggingface(model_id, docs):
 
     return np.vstack(embeddings)
 
+
 def encode_with_sbert(model_id, docs):
     model = SentenceTransformer(model_id)
     return model.encode(docs, show_progress_bar=True)
+
 
 def track_performance(func, *args, **kwargs):
     start_time = time.time()
@@ -89,6 +95,7 @@ def track_performance(func, *args, **kwargs):
 
     end_time = time.time()
     return result, end_time - start_time, max(cpu_samples), np.mean(cpu_samples)
+
 
 def clustering_metrics(embeddings, labels):
     metrics = {}
@@ -110,6 +117,7 @@ def clustering_metrics(embeddings, labels):
 
     return metrics
 
+
 def evaluate_model_with_all_clusterers(embeddings, model_name):
     results = []
     for algo_name, cluster_func in CLUSTERERS.items():
@@ -119,6 +127,7 @@ def evaluate_model_with_all_clusterers(embeddings, model_name):
         metrics["Algorithm"] = algo_name
         results.append(metrics)
     return results
+
 
 def main():
     texts, filenames = load_texts_from_folder(FOLDER_PATH)
@@ -145,6 +154,7 @@ def main():
     df = pd.DataFrame(all_results)
     df.to_csv("evaluation_data/clustering_evaluations/clustering_algorithm_comparison.csv", index=False)
     print("\\nSaved clustering_algorithm_comparison.csv")
+
 
 if __name__ == "__main__":
     main()

@@ -14,7 +14,6 @@ from pdfminer.pdfparser import PDFSyntaxError
 from config.constants import PDF_PATH
 
 
-# Utility functions
 def sanitize(filename):
     """Remove invalid characters from filename."""
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -57,7 +56,6 @@ def valid_title(title):
     return False
 
 
-# Caching frequently accessed data
 @lru_cache(maxsize=32)
 def metadata(filename):
     """Extract metadata from PDF file with caching."""
@@ -76,7 +74,6 @@ def metadata(filename):
 def pdf_text(filename, max_pages=2):
     """Extract text from PDF with caching and page limit."""
     try:
-        # Using PyMuPDF (fitz) instead of pdfminer for better performance
         pdf = fitz.open(filename)
         text = ""
         for page_num in range(min(max_pages, len(pdf))):
@@ -86,7 +83,6 @@ def pdf_text(filename, max_pages=2):
         return text
     except Exception:
         try:
-            # Fallback to pdfminer if PyMuPDF fails
             return extract_text(filename)
         except (PDFSyntaxError, Exception):
             return ""
@@ -100,12 +96,11 @@ def text_title(filename):
     def is_valid(line):
         lowered = line.lower()
         return (
-            len(line) >= 20
-            and not any(c in line for c in "@0123456789")
-            and not any(k in lowered for k in ignore_keywords)
+                len(line) >= 20
+                and not any(c in line for c in "@0123456789")
+                and not any(k in lowered for k in ignore_keywords)
         )
 
-    # Try to find the first two valid lines and join if both look like a title
     valid_lines = [line for line in lines[:6] if is_valid(line)]
 
     if len(valid_lines) >= 2 and valid_lines[0][-1] != '.':
@@ -116,7 +111,6 @@ def text_title(filename):
         fallback_candidates = [line for line in lines[:10] if not any(k in line.lower() for k in ignore_keywords)]
         title = max(fallback_candidates, key=len, default="Title not found")
 
-    # Heuristic: authors are typically in the 1-5 lines after title
     try:
         title_index = lines.index(valid_lines[0] if valid_lines else title)
         author_lines = [
@@ -133,25 +127,21 @@ def text_title(filename):
 def pdf_title(filename):
     """Get PDF title from metadata or text."""
     try:
-        # First try metadata
         meta = metadata(filename)
         title = meta.get('/Title', "")
         if valid_title(title):
             return title
 
-        # Fallback to text extraction
         title, _ = text_title(filename)
         if valid_title(title):
             return title
 
-        # Final fallback to filename
         return os.path.basename(os.path.splitext(filename)[0])
     except Exception as e:
         print(f"Error getting title for {filename}: {str(e)}")
         return os.path.basename(os.path.splitext(filename)[0])
 
 
-# Load spacy model only once
 _nlp = None
 
 
@@ -175,16 +165,12 @@ def extract_abstract(pdf_path):
         for page_num in range(min(2, len(pdf_document))):
             page = pdf_document.load_page(page_num)
             text += page.get_text()
-
         pdf_document.close()
-
-        # Improved regex pattern for abstract extraction
         abstract_patterns = [
             r'(?s)(?<=\bAbstract\b)\s*(.*?)(?=\b(?:\d*\s*)?(?:Introduction|1\.)\b)',
             r'(?s)(?<=\bA b s t r a c t\b)\s*(.*?)(?=\b(?:\d*\s*)?(?:Introduction|1\.)\b)',
             r'(?s)(?<=\bABSTRACT\b)\s*(.*?)(?=\b(?:\d*\s*)?(?:Introduction|1\.)\b)'
         ]
-
         for pattern in abstract_patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
@@ -211,23 +197,20 @@ def find_persons_locations(filename, title):
 
         doc = nlp(sanitized_text)
 
-        # Extract entities
         persons = [ent.text.strip() for ent in doc.ents if ent.label_ == "PERSON" and "ORG" not in ent.text]
         locations = [ent.text.strip().replace(".", "") for ent in doc.ents
-                     if ent.label_ == "GPE" and ent.text.strip().replace(".", "").replace(" ", "").isalpha()]
+                     if ent.label_ == "GPE" and ent.text.strip().replace
+                     (".", "").replace(" ", "").isalpha()]
 
-        # Process persons
         persons_text = sanitize_authors(', '.join(persons))
         persons_text = remove_email_addresses(persons_text)
 
-        # Filter out persons whose names appear in the title
         person_list = [name.strip() for name in persons_text.split(',') if name.strip()]
         title_parts = title.lower().split()
 
         filtered_persons = []
         for person in person_list:
             person_words = person.lower().split()
-            # Check if person name appears in title
             if not any(' '.join(title_parts[i:i + len(person_words)]) == ' '.join(person_words)
                        for i in range(len(title_parts) - len(person_words) + 1)):
                 filtered_persons.append(person)
@@ -244,7 +227,6 @@ def extract_references(pdf_path):
         pdf_document = fitz.open(pdf_path)
         num_pages = len(pdf_document)
 
-        # Start from the end of the document
         text = ""
         for page_num in range(num_pages - 1, max(num_pages - 4, -1), -1):
             page = pdf_document.load_page(page_num)
@@ -252,16 +234,13 @@ def extract_references(pdf_path):
 
         pdf_document.close()
 
-        # Check for references section
         if not re.search(r'\bReference(?:s)?\b', text, re.IGNORECASE):
             return "Nothing was found"
 
-        # Handle appendix
         appendix_match = re.search(r'\bAppendix\b', text, re.IGNORECASE)
         if appendix_match:
             text = text[:appendix_match.start()]
 
-        # Extract references
         references_match = re.search(r'\bReference(?:s)?\b\s*(.*)', text, re.IGNORECASE | re.DOTALL)
         if references_match:
             return references_match.group(1).strip()
@@ -281,7 +260,6 @@ def process_pdf(file_path, filename):
         abstract = extract_abstract(file_path) or "Nothing was found"
         references = extract_references(file_path) or "Nothing was found"
 
-        # Check if document is encrypted before trying to extract authors/locations
         is_encrypted = False
         try:
             doc = fitz.open(file_path)
@@ -324,7 +302,6 @@ def extract_details(directory):
 
     pdf_details = {}
 
-    # Use ThreadPoolExecutor for parallel processing
     with ThreadPoolExecutor(max_workers=min(os.cpu_count(), 4)) as executor:
         future_to_file = {
             executor.submit(process_pdf, os.path.join(directory, filename), filename): filename
@@ -352,7 +329,6 @@ def extract_details(directory):
                     "references": "Nothing was found (error)"
                 }
 
-            # Print progress
             elapsed_time = time.time() - start_time
             avg_time_per_file = elapsed_time / (i + 1)
             remaining_files = total_files - (i + 1)
@@ -390,11 +366,9 @@ def extract_title(text_lines):
     """
     lines = [line.strip() for line in text_lines if line.strip()]
 
-    # Prefer the first line that seems like a title
-    for line in lines[:5]:  # Check only the top 5 lines
-        if len(line) >= 20 and not any(c in line for c in "@0123456789"):  # Avoid author/email lines
+    for line in lines[:5]:
+        if len(line) >= 20 and not any(c in line for c in "@0123456789"):
             return line
 
-    # Fallback to the longest line among top 10 if nothing else
     fallback = max(lines[:10], key=len, default="Title not found")
     return fallback

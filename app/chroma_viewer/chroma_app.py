@@ -39,6 +39,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def get_collection_details(collection_name: str) -> Dict[str, Any]:
     collection = chroma_client.get_collection(collection_name)
     return {
@@ -46,6 +47,7 @@ def get_collection_details(collection_name: str) -> Dict[str, Any]:
         'count': collection.count(),
         'metadata': collection.metadata or {}
     }
+
 
 def extract_pdf_info(filepath):
     from extract_data import process_pdf
@@ -67,11 +69,6 @@ def extract_pdf_info(filepath):
             'year': random.randint(2010, 2023)
         }
 
-def run_dashboard():
-    # Resolve path: go one directory up from this file, then dashboard.py
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # goes up to 'app/'
-    dashboard_path = os.path.join(base_dir, "dashboard.py")
-    subprocess.run(["streamlit", "run", dashboard_path])
 
 @app.route('/')
 def index():
@@ -88,6 +85,7 @@ def index():
         flash(f"Error: {str(e)}", "error")
         return render_template('index.html', collections=[], directories=[])
 
+
 @app.route('/delete/<collection_name>', methods=['POST'])
 def delete_collection(collection_name):
     try:
@@ -96,6 +94,7 @@ def delete_collection(collection_name):
     except Exception as e:
         flash(f"Error deleting: {str(e)}", "error")
     return redirect(url_for('index'))
+
 
 @app.route('/create', methods=['POST'])
 def create_collection():
@@ -109,6 +108,7 @@ def create_collection():
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
     return redirect(url_for('index'))
+
 
 @app.route('/view/<collection_name>')
 def view_collection(collection_name):
@@ -130,6 +130,7 @@ def view_collection(collection_name):
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for('index'))
 
+
 @app.route('/download-pdfs', methods=['POST'])
 def download_pdfs():
     try:
@@ -146,14 +147,16 @@ def download_pdfs():
         os.makedirs(save_path, exist_ok=True)
 
         from download_pdfs import download_random_arxiv_papers
-        download_random_arxiv_papers(num_papers=num_pdfs, save_directory=save_path, category=category if category else None)
+        download_random_arxiv_papers(num_papers=num_pdfs, save_directory=save_path,
+                                     category=category if category else None)
 
-
-        flash(f"Downloaded {num_pdfs} PDFs to {target_dir}" + (f" (category: {category})" if category else ""), "success")
+        flash(f"Downloaded {num_pdfs} PDFs to {target_dir}" + (f" (category: {category})" if category else ""),
+              "success")
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
 
     return redirect(url_for('index'))
+
 
 @app.route('/vectorize-pdfs', methods=['POST'])
 def vectorize_pdfs():
@@ -190,13 +193,14 @@ def vectorize_pdfs():
                 'year': info.get('year', 2023)
             }
 
-        count = process_documents_in_batches(details, directory_path)
+        count = process_documents_in_batches(details, directory_path, collection)
         flash(f"Added {count} documents to '{collection_name}'", "success")
         return redirect(url_for('view_collection', collection_name=collection_name))
 
     except Exception as e:
         flash(f"Vectorization error: {str(e)}", "error")
         return redirect(url_for('index'))
+
 
 @app.route('/status')
 def status():
@@ -210,6 +214,7 @@ def status():
     except:
         return jsonify({'model_loaded': False, 'device': 'unknown', 'pdf_count': 0})
 
+
 @app.route('/list-files/<directory>')
 def list_files(directory):
     try:
@@ -221,6 +226,7 @@ def list_files(directory):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/list-directories')
 def list_directories():
     try:
@@ -231,6 +237,7 @@ def list_directories():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/reload-model', methods=['POST'])
 def reload_model():
     try:
@@ -239,6 +246,7 @@ def reload_model():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
 
 @app.route('/delete-document/<collection_name>', methods=['POST'])
 def delete_document(collection_name):
@@ -256,14 +264,26 @@ def delete_document(collection_name):
 
     return redirect(url_for('view_collection', collection_name=collection_name))
 
-@app.route('/launch-dashboard', methods=['POST'])
-def launch_dashboard():
+
+@app.route('/launch-dashboard/<collection_name>', methods=['POST'])
+def launch_dashboard(collection_name):
     try:
-        threading.Thread(target=run_dashboard, daemon=True).start()
-        flash("Dashboard is launching in a new tab (or visit http://localhost:8501)", "success")
+        threading.Thread(
+            target=lambda: run_dashboard(collection_name),
+            daemon=True
+        ).start()
+        flash(f"Launching dashboard with collection: {collection_name}", "success")
     except Exception as e:
         flash(f"Failed to launch dashboard: {str(e)}", "error")
     return redirect(url_for('index'))
+
+
+def run_dashboard(collection_name):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    dashboard_path = os.path.join(base_dir, "dashboard.py")
+    env = {**os.environ, "CHROMA_COLLECTION": collection_name}
+    subprocess.run(["streamlit", "run", dashboard_path], env=env)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

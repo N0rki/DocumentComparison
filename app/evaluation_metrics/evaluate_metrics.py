@@ -25,6 +25,7 @@ MODELS = {
     "SPECTER2": "allenai/specter2"
 }
 
+
 # Hugging Face model-based encoding
 def encode_with_huggingface(model_id, docs):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -41,10 +42,12 @@ def encode_with_huggingface(model_id, docs):
 
     return np.vstack(embeddings)
 
+
 # SBERT-style encoding
 def encode_with_sbert(model_id, docs):
     model = SentenceTransformer(model_id)
     return model.encode(docs, show_progress_bar=True)
+
 
 # Performance wrapper
 def track_performance(func, *args, **kwargs):
@@ -54,7 +57,8 @@ def track_performance(func, *args, **kwargs):
     end_time = time.time()
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    return result, end_time - start_time, peak / 10**6
+    return result, end_time - start_time, peak / 10 ** 6
+
 
 # Core evaluation
 def evaluate_embeddings(embeddings, filenames, model_name):
@@ -83,7 +87,8 @@ def evaluate_embeddings(embeddings, filenames, model_name):
 
     # Save matrices
     pd.DataFrame(sim_matrix, index=filenames, columns=filenames).to_csv(f"{model_name}_similarity_matrix.csv")
-    pd.DataFrame(sim_matrix_contextual, index=filenames, columns=filenames).to_csv(f"{model_name}_similarity_matrix_contextual.csv")
+    pd.DataFrame(sim_matrix_contextual, index=filenames, columns=filenames).to_csv(
+        f"{model_name}_similarity_matrix_contextual.csv")
 
     # Save heatmap
     plt.figure(figsize=(8, 6))
@@ -94,6 +99,7 @@ def evaluate_embeddings(embeddings, filenames, model_name):
     plt.close()
 
     return results
+
 
 def main():
     print("Loading PDF documents...")
@@ -120,6 +126,7 @@ def main():
     df_summary.set_index("Model", inplace=True)
     df_summary.to_csv("model_comparison_summary.csv")
     print("\nSaved model_comparison_summary.csv")
+
 
 if __name__ == "__main__":
     main()

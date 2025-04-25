@@ -28,6 +28,7 @@ MODELS = {
     "SPECTER": "allenai/specter"
 }
 
+
 def extract_text_from_pdf(pdf_path, max_pages=2):
     try:
         doc = fitz.open(pdf_path)
@@ -40,6 +41,7 @@ def extract_text_from_pdf(pdf_path, max_pages=2):
         print(f"Error reading {pdf_path}: {e}")
         return ""
 
+
 def load_texts_from_folder(folder_path):
     docs = []
     filenames = []
@@ -51,6 +53,7 @@ def load_texts_from_folder(folder_path):
                 docs.append(text)
                 filenames.append(fname)
     return docs, filenames
+
 
 def encode_with_huggingface(model_id, docs):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -67,9 +70,11 @@ def encode_with_huggingface(model_id, docs):
 
     return np.vstack(embeddings)
 
+
 def encode_with_sbert(model_id, docs):
     model = SentenceTransformer(model_id)
     return model.encode(docs, show_progress_bar=True)
+
 
 def track_performance(func, *args, **kwargs):
     start_cpu = psutil.cpu_percent(interval=None)
@@ -89,6 +94,7 @@ def track_performance(func, *args, **kwargs):
     end_time = time.time()
     return result, end_time - start_time, max(cpu_samples), np.mean(cpu_samples)
 
+
 def top_k_neighbor_consistency(embeddings, labels, k=5):
     similarities = pairwise.cosine_similarity(embeddings)
     np.fill_diagonal(similarities, -np.inf)
@@ -100,6 +106,7 @@ def top_k_neighbor_consistency(embeddings, labels, k=5):
         consistent.append(np.mean(same_cluster))
 
     return np.mean(consistent)
+
 
 def evaluate_embeddings(embeddings, filenames, model_name):
     results = {}
@@ -133,7 +140,8 @@ def evaluate_embeddings(embeddings, filenames, model_name):
     intra_inter_ratio = intra_cluster_distance / inter_cluster_distance
 
     # Save cosine matrix
-    pd.DataFrame(cosine_sim, index=filenames, columns=filenames).to_csv(f"evaluation_data/model_evaluations/{model_name}_similarity_matrix.csv")
+    pd.DataFrame(cosine_sim, index=filenames, columns=filenames).to_csv(
+        f"evaluation_data/model_evaluations/{model_name}_similarity_matrix.csv")
 
     # Silhouette histogram
     plt.hist(silhouette if isinstance(silhouette, np.ndarray) else [silhouette], bins=20)
@@ -193,6 +201,7 @@ def main():
     df_summary.set_index("Model", inplace=True)
     df_summary.to_csv("evaluation_data/model_evaluations/model_comparison_summary.csv")
     print("\\nSaved model_comparison_summary.csv")
+
 
 if __name__ == "__main__":
     main()

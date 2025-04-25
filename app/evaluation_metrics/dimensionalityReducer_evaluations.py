@@ -20,6 +20,7 @@ MODEL_ID = "allenai/specter"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 OUTPUT_CSV = "evaluation_data/reducer_evaluations/dimensionality_reduction_evaluation.csv"
 
+
 # Autoencoder
 class Autoencoder(nn.Module):
     def __init__(self, input_dim):
@@ -41,6 +42,7 @@ class Autoencoder(nn.Module):
     def encode(self, x):
         return self.encoder(x)
 
+
 def run_autoencoder(X, epochs=100, batch_size=8, lr=0.001):
     X_tensor = torch.tensor(X, dtype=torch.float32)
     model = Autoencoder(X.shape[1])
@@ -60,6 +62,7 @@ def run_autoencoder(X, epochs=100, batch_size=8, lr=0.001):
         reduced = model.encode(X_tensor).numpy()
     return reduced
 
+
 def extract_text_from_pdf(pdf_path, max_pages=2):
     try:
         doc = fitz.open(pdf_path)
@@ -72,6 +75,7 @@ def extract_text_from_pdf(pdf_path, max_pages=2):
         print(f"Failed to extract {pdf_path}: {e}")
         return ""
 
+
 def load_pdfs(folder_path):
     docs = []
     filenames = []
@@ -83,6 +87,7 @@ def load_pdfs(folder_path):
                 docs.append(content)
                 filenames.append(fname)
     return docs, filenames
+
 
 def encode_with_specter(docs):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
@@ -98,6 +103,7 @@ def encode_with_specter(docs):
             embeddings.append(cls_emb.cpu().numpy())
 
     return np.vstack(embeddings)
+
 
 def reduce_and_evaluate(X, model_name="SPECTER"):
     reducers = {
@@ -148,6 +154,7 @@ def reduce_and_evaluate(X, model_name="SPECTER"):
 
     return results
 
+
 def main():
     print("Loading documents...")
     docs, filenames = load_pdfs(PDF_FOLDER)
@@ -164,6 +171,7 @@ def main():
     df = pd.DataFrame(results)
     df.to_csv(OUTPUT_CSV, index=False)
     print(f"Saved dimensionality reduction metrics to {OUTPUT_CSV}")
+
 
 if __name__ == "__main__":
     main()
